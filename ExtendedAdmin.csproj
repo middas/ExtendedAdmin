@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\Tshock Debug\ServerPlugins\</OutputPath>
+    <OutputPath>..\..\Tshock Debug\ServerPlugins\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -41,7 +41,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="TerrariaServer">
-      <HintPath>..\TerrariaServerBins\TerrariaServer.exe</HintPath>
+      <HintPath>..\TShock\TerrariaServerBins\TerrariaServer.exe</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -52,12 +52,11 @@
     <Compile Include="ExtendedTSPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TShockAPI\TShockAPI.csproj">
+    <ProjectReference Include="..\TShock\TShockAPI\TShockAPI.csproj">
       <Project>{49606449-072B-4CF5-8088-AA49DA586694}</Project>
       <Name>TShockAPI</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
