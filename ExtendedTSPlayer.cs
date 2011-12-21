@@ -6,14 +6,19 @@ using TShockAPI;
 
 namespace ExtendedAdmin
 {
-    public class ExtendedTSPlayer : TSPlayer
+    public class ExtendedTSPlayer
     {
+        public TSPlayer Player
+        {
+            get;
+            private set;
+        }
+
         public bool IsInvincible { get; set; }
 
-        public ExtendedTSPlayer(int ply) :
-            base(ply)
+        public ExtendedTSPlayer(TSPlayer ply)
         {
-            
+            Player = ply;
         }
     }
 }

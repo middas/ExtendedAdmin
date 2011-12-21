@@ -2,15 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
 
 namespace ExtendedAdmin
 {
     public static class ExtendedPermissions
     {
-        /// <summary>
-        /// Whether or not invincibility can be used
-        /// </summary>
+        [Description("Required for invincible command")]
         public static readonly string caninvincible;
+
+        [Description("Required for the ghost command")]
+        public static readonly string canghost;
 
         static ExtendedPermissions()
         {

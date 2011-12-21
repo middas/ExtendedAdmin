@@ -6,6 +6,9 @@ using TShockAPI;
 using Terraria;
 using Hooks;
 using System.ComponentModel;
+using System.Reflection;
+using System.IO;
+using System.IO.Streams;
 
 namespace ExtendedAdmin
 {
@@ -13,10 +16,12 @@ namespace ExtendedAdmin
     public class ExtendedAdmin : TerrariaPlugin
     {
         public static ExtendedTSPlayer[] Players = new ExtendedTSPlayer[Main.maxPlayers];
+        public static ExtendedAdminConfig Config;
 
         public ExtendedAdmin(Terraria.Main game) :
             base(game)
         {
+            Config = new ExtendedAdminConfig();
         }
 
         public override string Author
@@ -47,12 +52,14 @@ namespace ExtendedAdmin
         {
             get
             {
-                return new Version(1, 0);
+                return Assembly.GetExecutingAssembly().GetName().Version;
             }
         }
 
         public override void Initialize()
         {
+            ExtendedFileTools.InitConfig();
+
             ServerHooks.Join += new Action<int, System.ComponentModel.HandledEventArgs>(ServerHooks_Join);
             NetHooks.GetData += new NetHooks.GetDataD(NetHooks_GetData);
 
@@ -63,12 +70,12 @@ namespace ExtendedAdmin
 
         private void NetHooks_GetData(GetDataEventArgs e)
         {
+            var player = Players[e.Msg.whoAmI];
+
             PacketTypes type = e.MsgID;
 
             if (type == PacketTypes.PlayerDamage)
             {
-                var player = Players[e.Msg.whoAmI];
-
                 if (player == null)
                 {
                     e.Handled = true;
@@ -77,18 +84,37 @@ namespace ExtendedAdmin
 
                 if (player.IsInvincible)
                 {
-                    if (player.TPlayer.statLife < player.TPlayer.statLifeMax)
+                    if (player.Player.TPlayer.statLife < player.Player.TPlayer.statLifeMax)
                     {
-                        int deficit = player.TPlayer.statLifeMax - player.TPlayer.statLife;
+                        int deficit = player.Player.TPlayer.statLifeMax - player.Player.TPlayer.statLife;
 
-                        int heartNum = (deficit / 20) + 1;
+                        int heartNum = (deficit / 20) + 4;
 
                         var heart = TShock.Utils.GetItemById(58);
 
                         for (int i = 0; i < heartNum; i++)
                         {
-                            player.GiveItem(heart.type, heart.name, heart.width, heart.height, 1);
+                            player.Player.GiveItem(heart.type, heart.name, heart.width, heart.height, 1);
                         }
+                    }
+                }
+            }
+            else if (type == PacketTypes.ChestGetContents)
+            {
+                if (player == null)
+                {
+                    e.Handled = false;
+                    return;
+                }
+
+                using (MemoryStream ms = new MemoryStream(e.Msg.readBuffer, e.Index, e.Length))
+                {
+                    int x = ms.ReadInt32();
+                    int y = ms.ReadInt32();
+                    if (!player.Player.Group.HasPermission(Permissions.editspawn) && !TShock.Regions.CanBuild(x, y, player.Player) && TShock.Regions.InArea(x, y))
+                    {
+                        player.Player.SendMessage(string.Format("Chests in region name: {0} are protected.", TShock.Regions.InAreaRegionName(x, y)), Color.Red);
+                        e.Handled = true;
                     }
                 }
             }
@@ -96,7 +122,8 @@ namespace ExtendedAdmin
 
         private void ServerHooks_Join(int ply, HandledEventArgs args)
         {
-            var player = new ExtendedTSPlayer(ply);
+            var tPlayer = TShock.Players[ply];
+            var player = new ExtendedTSPlayer(tPlayer);
 
             Players[ply] = player;
         }

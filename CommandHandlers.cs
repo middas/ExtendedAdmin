@@ -48,7 +48,7 @@ namespace ExtendedAdmin
 
             player.IsInvincible = !player.IsInvincible;
 
-            player.SendMessage(message, Color.Green);
+            player.Player.SendMessage(message, Color.Green);
         }
 
         public static void SpawnMobAtPlayerHandler(CommandArgs args)
