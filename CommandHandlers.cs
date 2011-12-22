@@ -4,11 +4,14 @@ using System.Linq;
 using System.Text;
 using TShockAPI;
 using Terraria;
+using ExtendedAdmin.DB;
+using CommonLibrary.Native;
 
 namespace ExtendedAdmin
 {
     public static class CommandHandlers
     {
+        #region Users
         public static void GetUserName(CommandArgs args)
         {
             if (args.Parameters.Count < 1)
@@ -35,7 +38,6 @@ namespace ExtendedAdmin
             }
         }
 
-
         public static void HandleInvincible(CommandArgs args)
         {
             var player = ExtendedAdmin.Players[args.Player.Index];
@@ -50,7 +52,9 @@ namespace ExtendedAdmin
 
             player.Player.SendMessage(message, Color.Green);
         }
+        #endregion
 
+        #region Spawning
         public static void SpawnMobAtPlayerHandler(CommandArgs args)
         {
             if (args.Parameters.Count < 2 || args.Parameters.Count > 3)
@@ -105,5 +109,83 @@ namespace ExtendedAdmin
                     args.Player.SendMessage("Invalid mob type!", Color.Red);
             }
         }
+        #endregion
+
+        #region Region Helper
+        public static void HandleLockDoor(CommandArgs args)
+        {
+            if (args.Parameters.Count == 0 || args.Parameters.Count > 1)
+            {
+                args.Player.SendMessage("Incorrect syntax! Correct syntax: /lockdoors <region>", Color.Red);
+                return;
+            }
+
+            var region = TShock.Regions.GetRegionByName(args.Parameters[0]);
+
+            if (region == null)
+            {
+                args.Player.SendMessage("No region found with that query.", Color.Red);
+                return;
+            }
+
+            if (!args.Player.Group.HasPermission(Permissions.editspawn) && !TShock.Regions.CanBuild(args.Player.TileX, args.Player.TileY, args.Player) && TShock.Regions.InArea(args.Player.TileX, args.Player.TileY))
+            {
+                args.Player.SendMessage(string.Format("You do not have permission to build in region {0}", args.Parameters[0]), Color.Red);
+            }
+            else
+            {
+                RegionHelperManager regionHelper = new RegionHelperManager(TShock.DB);
+
+                regionHelper.LockRegion(args.Parameters[0]);
+
+                args.Player.SendMessage(string.Format("Region {0} doors are now locked.", args.Parameters[0]), Color.Green);
+            }
+
+        }
+
+        public static void HandleUnlockDoor(CommandArgs args)
+        {
+            if (args.Parameters.Count == 0 || args.Parameters.Count > 1)
+            {
+                args.Player.SendMessage("Incorrect syntax! Correct syntax: /unlockdoors <region>", Color.Red);
+                return;
+            }
+
+            var region = TShock.Regions.GetRegionByName(args.Parameters[0]);
+
+            if (region == null)
+            {
+                args.Player.SendMessage("No region found with that query.", Color.Red);
+                return;
+            }
+
+            if (!args.Player.Group.HasPermission(Permissions.editspawn) && !TShock.Regions.CanBuild(args.Player.TileX, args.Player.TileY, args.Player) && TShock.Regions.InArea(args.Player.TileX, args.Player.TileY))
+            {
+                args.Player.SendMessage(string.Format("You do not have permission to build in region {0}", args.Parameters[0]), Color.Red);
+            }
+            else
+            {
+                RegionHelperManager regionHelper = new RegionHelperManager(TShock.DB);
+
+                regionHelper.UnlockRegion(args.Parameters[0]);
+
+                args.Player.SendMessage(string.Format("Region {0} doors are now unlocked.", args.Parameters[0]), Color.Green);
+            }
+        }
+
+        public static void HandleCurrentRegion(CommandArgs args)
+        {
+            var region = TShock.Regions.InAreaRegionName(args.Player.TileX, args.Player.TileY);
+
+            if (region.IsNullOrEmptyTrim())
+            {
+                args.Player.SendMessage("Not currently in a region.", Color.Yellow);
+            }
+            else
+            {
+                args.Player.SendMessage(string.Format("Current region is {0}", region), Color.Yellow);
+            }
+        }
+        #endregion
     }
 }

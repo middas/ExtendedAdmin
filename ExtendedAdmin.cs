@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.IO;
 using System.IO.Streams;
+using ExtendedAdmin.DB;
 
 namespace ExtendedAdmin
 {
@@ -66,6 +67,9 @@ namespace ExtendedAdmin
             Commands.ChatCommands.Add(new Command(Permissions.manageregion, CommandHandlers.GetUserName, "username", "un"));
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.caninvincible, CommandHandlers.HandleInvincible, "invincible"));
             Commands.ChatCommands.Add(new Command(Permissions.spawnmob, CommandHandlers.SpawnMobAtPlayerHandler, "spawnmobat", "sma"));
+            Commands.ChatCommands.Add(new Command(CommandHandlers.HandleLockDoor, "lockdoors", "ld"));
+            Commands.ChatCommands.Add(new Command(CommandHandlers.HandleUnlockDoor, "unlockdoors", "ud"));
+            Commands.ChatCommands.Add(new Command(CommandHandlers.HandleCurrentRegion, "currentregion"));
         }
 
         private void NetHooks_GetData(GetDataEventArgs e)
@@ -114,6 +118,36 @@ namespace ExtendedAdmin
                     if (!player.Player.Group.HasPermission(Permissions.editspawn) && !TShock.Regions.CanBuild(x, y, player.Player) && TShock.Regions.InArea(x, y))
                     {
                         player.Player.SendMessage(string.Format("Chests in region name: {0} are protected.", TShock.Regions.InAreaRegionName(x, y)), Color.Red);
+                        e.Handled = true;
+                    }
+                }
+            }
+            else if (type == PacketTypes.DoorUse)
+            {
+                if (player == null)
+                {
+                    e.Handled = false;
+                    return;
+                }
+
+                using (MemoryStream ms = new MemoryStream(e.Msg.readBuffer, e.Index, e.Length))
+                {
+                    bool closed = ms.ReadBoolean();
+                    int x = ms.ReadInt32();
+                    int y = ms.ReadInt32();
+
+                    RegionHelperManager regionHelper = new RegionHelperManager(TShock.DB);
+
+                    if (!player.Player.Group.HasPermission(Permissions.editspawn) && !TShock.Regions.CanBuild(x, y, player.Player) && TShock.Regions.InArea(x, y) && regionHelper.GetRegionHelperByRegion(TShock.Regions.InAreaRegionName(x, y)).IsLocked)
+                    {
+                        NetMessage.SendData((int)PacketTypes.DoorUse, -1, -1, "", 1, x, y);
+
+                        int warpX = player.Player.TileX > x ? player.Player.TileX + 3 : player.Player.TileX - 3;
+
+                        player.Player.Teleport(warpX, player.Player.TileY + 3);
+
+                        player.Player.SendMessage(string.Format("Doors in region name: {0} are locked.", TShock.Regions.InAreaRegionName(x, y)), Color.Red);
+
                         e.Handled = true;
                     }
                 }

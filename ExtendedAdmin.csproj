@@ -33,6 +33,10 @@
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="MySql.Data, Version=6.2.3.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\TShock\SqlBins\MySql.Data.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.0.2.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\TShock\TShockAPI\Newtonsoft.Json.dll</HintPath>
@@ -51,8 +55,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DB\RegionHelper.cs" />
     <Compile Include="ExtendedAdminConfig.cs" />
     <Compile Include="ExtendedFileTools.cs" />
+    <Compile Include="ExtendedLog.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CommandHandlers.cs" />
     <Compile Include="ExtendedAdmin.cs" />
