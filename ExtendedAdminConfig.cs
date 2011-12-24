@@ -11,7 +11,23 @@ namespace ExtendedAdmin
 {
     public class ExtendedAdminConfig
     {
-        public string Placeholder = "";
+        [Description("Raffle starting pot")]
+        public int RaffleStartPot = 100;
+
+        [Description("Minutes between raffles")]
+        public int RaffleDuration = 60;
+
+        [Description("The odds of winning the raffle")]
+        public int RaffleOdds = 65535;
+
+        [Description("The cost of a raffle ticket")]
+        public int RaffleTicketCost = 100;
+
+        [Description("Time between raffle updates (minutes)")]
+        public int RaffleUpdateDuration = 10;
+
+        [Description("Maximum number of raffle tickets")]
+        public int MaxRaffleTickets = 500;
 
         public static ExtendedAdminConfig Read(string path)
         {

@@ -14,6 +14,9 @@ namespace ExtendedAdmin
         [Description("Required for the ghost command")]
         public static readonly string canghost;
 
+        [Description("Raffle manager")]
+        public static readonly string rafflemanager;
+
         static ExtendedPermissions()
         {
             foreach (var field in typeof(ExtendedPermissions).GetFields())

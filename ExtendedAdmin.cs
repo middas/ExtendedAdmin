@@ -18,6 +18,7 @@ namespace ExtendedAdmin
     {
         public static ExtendedTSPlayer[] Players = new ExtendedTSPlayer[Main.maxPlayers];
         public static ExtendedAdminConfig Config;
+        public static RaffleHandler Raffle;
 
         public ExtendedAdmin(Terraria.Main game) :
             base(game)
@@ -61,8 +62,11 @@ namespace ExtendedAdmin
         {
             ExtendedFileTools.InitConfig();
 
+            Raffle = new RaffleHandler();
+
             ServerHooks.Join += new Action<int, System.ComponentModel.HandledEventArgs>(ServerHooks_Join);
             NetHooks.GetData += new NetHooks.GetDataD(NetHooks_GetData);
+            GameHooks.Update += new Action(GameHooks_Update);
 
             Commands.ChatCommands.Add(new Command(Permissions.manageregion, CommandHandlers.GetUserName, "username", "un"));
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.caninvincible, CommandHandlers.HandleInvincible, "invincible"));
@@ -70,6 +74,22 @@ namespace ExtendedAdmin
             Commands.ChatCommands.Add(new Command(CommandHandlers.HandleLockDoor, "lockdoors", "ld"));
             Commands.ChatCommands.Add(new Command(CommandHandlers.HandleUnlockDoor, "unlockdoors", "ud"));
             Commands.ChatCommands.Add(new Command(CommandHandlers.HandleCurrentRegion, "currentregion"));
+            Commands.ChatCommands.Add(new Command(CommandHandlers.BuyRaffleTicket, "buyraffleticket"));
+            Commands.ChatCommands.Add(new Command(CommandHandlers.RaffleInfo, "raffleinfo"));
+            Commands.ChatCommands.Add(new Command(ExtendedPermissions.rafflemanager, CommandHandlers.StartRaffle, "startraffle"));
+        }
+
+        private void GameHooks_Update()
+        {
+            if (RaffleHandler.NextRaffleTime <= DateTime.Now)
+            {
+                Raffle.BeginRaffle();
+            }
+
+            if (RaffleHandler.NextRaffleUpdate <= DateTime.Now)
+            {
+                Raffle.Update();
+            }
         }
 
         private void NetHooks_GetData(GetDataEventArgs e)
@@ -140,7 +160,12 @@ namespace ExtendedAdmin
 
                     if (!player.Player.Group.HasPermission(Permissions.editspawn) && !TShock.Regions.CanBuild(x, y, player.Player) && TShock.Regions.InArea(x, y) && regionHelper.GetRegionHelperByRegion(TShock.Regions.InAreaRegionName(x, y)).IsLocked)
                     {
+                        int size = 10;
+
                         NetMessage.SendData((int)PacketTypes.DoorUse, -1, -1, "", 1, x, y);
+
+                        TSPlayer.All.SendTileSquare(x, y, size);
+                        WorldGen.RangeFrame(x, y, x + size, y + size);
 
                         int warpX = player.Player.TileX > x ? player.Player.TileX + 3 : player.Player.TileX - 3;
 

@@ -6,6 +6,7 @@ using TShockAPI;
 using Terraria;
 using ExtendedAdmin.DB;
 using CommonLibrary.Native;
+using TShockAPI.DB;
 
 namespace ExtendedAdmin
 {
@@ -114,13 +115,28 @@ namespace ExtendedAdmin
         #region Region Helper
         public static void HandleLockDoor(CommandArgs args)
         {
-            if (args.Parameters.Count == 0 || args.Parameters.Count > 1)
+            if (args.Parameters.Count > 1)
             {
                 args.Player.SendMessage("Incorrect syntax! Correct syntax: /lockdoors <region>", Color.Red);
                 return;
             }
 
-            var region = TShock.Regions.GetRegionByName(args.Parameters[0]);
+            Region region;
+
+            if (args.Parameters.Count > 0)
+            {
+                region = TShock.Regions.GetRegionByName(args.Parameters[0]);
+            }
+            else
+            {
+                if (!args.Player.RealPlayer)
+                {
+                    args.Player.SendMessage("You must be logged in to use this without a parameter.", Color.Red);
+                    return;
+                }
+
+                region = TShock.Regions.GetRegionByName(TShock.Regions.InAreaRegionName(args.Player.TileX, args.Player.TileY));
+            }
 
             if (region == null)
             {
@@ -136,22 +152,37 @@ namespace ExtendedAdmin
             {
                 RegionHelperManager regionHelper = new RegionHelperManager(TShock.DB);
 
-                regionHelper.LockRegion(args.Parameters[0]);
+                regionHelper.LockRegion(region.Name);
 
-                args.Player.SendMessage(string.Format("Region {0} doors are now locked.", args.Parameters[0]), Color.Green);
+                args.Player.SendMessage(string.Format("Region {0} doors are now locked.", region.Name), Color.Green);
             }
 
         }
 
         public static void HandleUnlockDoor(CommandArgs args)
         {
-            if (args.Parameters.Count == 0 || args.Parameters.Count > 1)
+            if (args.Parameters.Count > 1)
             {
                 args.Player.SendMessage("Incorrect syntax! Correct syntax: /unlockdoors <region>", Color.Red);
                 return;
             }
 
-            var region = TShock.Regions.GetRegionByName(args.Parameters[0]);
+            Region region;
+
+            if (args.Parameters.Count > 0)
+            {
+                region = TShock.Regions.GetRegionByName(args.Parameters[0]);
+            }
+            else
+            {
+                if (!args.Player.RealPlayer)
+                {
+                    args.Player.SendMessage("You must be logged in to use this without a parameter.", Color.Red);
+                    return;
+                }
+
+                region = TShock.Regions.GetRegionByName(TShock.Regions.InAreaRegionName(args.Player.TileX, args.Player.TileY));
+            }
 
             if (region == null)
             {
@@ -167,14 +198,20 @@ namespace ExtendedAdmin
             {
                 RegionHelperManager regionHelper = new RegionHelperManager(TShock.DB);
 
-                regionHelper.UnlockRegion(args.Parameters[0]);
+                regionHelper.UnlockRegion(region.Name);
 
-                args.Player.SendMessage(string.Format("Region {0} doors are now unlocked.", args.Parameters[0]), Color.Green);
+                args.Player.SendMessage(string.Format("Region {0} doors are now unlocked.", region.Name), Color.Green);
             }
         }
 
         public static void HandleCurrentRegion(CommandArgs args)
         {
+            if (!args.Player.RealPlayer)
+            {
+                args.Player.SendMessage("You must be logged in to use this command.", Color.Red);
+                return;
+            }
+
             var region = TShock.Regions.InAreaRegionName(args.Player.TileX, args.Player.TileY);
 
             if (region.IsNullOrEmptyTrim())
@@ -184,6 +221,95 @@ namespace ExtendedAdmin
             else
             {
                 args.Player.SendMessage(string.Format("Current region is {0}", region), Color.Yellow);
+            }
+        }
+        #endregion
+
+        #region Raffle
+        public static void StartRaffle(CommandArgs args)
+        {
+            ExtendedAdmin.Raffle.BeginRaffle();
+        }
+
+        public static void RaffleInfo(CommandArgs args)
+        {
+            if (!args.Player.RealPlayer || args.Player.UserAccountName.IsNullOrEmptyTrim())
+            {
+                args.Player.SendMessage("You must be logged in to use this command.");
+                return;
+            }
+
+            RaffleManager manager = new RaffleManager(TShock.DB);
+
+            var raffle = manager.GetCurrentRaffle();
+            var tickets = manager.GetRaffleTickets(args.Player.UserAccountName, raffle.RaffleID);
+
+            TimeSpan nextRaffle = RaffleHandler.NextRaffleTime - DateTime.Now;
+
+            args.Player.SendMessage(string.Format("Ticket cost: {0} Current tickets: {1} Next raffle: {2} minute(s) {4} second(s) Current pot: {3}", ExtendedAdmin.Config.RaffleTicketCost, tickets.TicketCount, (int)nextRaffle.TotalMinutes, raffle.Pot, nextRaffle.Seconds), Color.Green);
+        }
+
+        public static void BuyRaffleTicket(CommandArgs args)
+        {
+            if (!args.Player.RealPlayer || args.Player.UserAccountName.IsNullOrEmptyTrim())
+            {
+                args.Player.SendMessage("You must be logged in to use this command.", Color.Red);
+                return;
+            }
+
+            if (args.Parameters.Count > 0 && args.Parameters[0].ToIntegerOrDefault(-1) < 1)
+            {
+                args.Player.SendMessage("Invalid syntax! Proper syntax /buyraffleticket <amount>", Color.Red);
+                return;
+            }
+
+            RaffleManager manager = new RaffleManager(TShock.DB);
+
+            var account = manager.GetServerPointAccounts(args.Player.UserAccountName);
+
+            if (account == null)
+            {
+                args.Player.SendMessage("You do not have any shards.");
+                return;
+            }
+
+            int amount;
+
+            if (args.Parameters.Count > 0)
+            {
+                amount = args.Parameters[0].ToIntegerOrDefault(0);
+            }
+            else
+            {
+                amount = 1;
+            }
+
+            int totalCost = amount * ExtendedAdmin.Config.RaffleTicketCost;
+
+            if (account.Amount < totalCost)
+            {
+                args.Player.SendMessage(string.Format("You do not have enough shards to buy {0} tickets.", amount), Color.Red);
+                return;
+            }
+
+            var raffle = manager.GetCurrentRaffle();
+            var tickets = manager.GetRaffleTickets(args.Player.UserAccountName, raffle.RaffleID);
+
+            if (tickets.TicketCount + amount > ExtendedAdmin.Config.MaxRaffleTickets)
+            {
+                args.Player.SendMessage(string.Format("You cannot have over {0} tickets.  You currently have {1}", ExtendedAdmin.Config.MaxRaffleTickets, tickets.TicketCount), Color.Red);
+                return;
+            }
+
+            if (manager.BuyTicket(args.Player, amount, totalCost))
+            {
+                tickets = manager.GetRaffleTickets(args.Player.UserAccountName, raffle.RaffleID);
+
+                args.Player.SendMessage(string.Format("Successfully bought tickets. You now have {0} tickets.", tickets.TicketCount), Color.Green);
+            }
+            else
+            {
+                args.Player.SendMessage("Ticket purchase failed, please try again later.", Color.Red);
             }
         }
         #endregion

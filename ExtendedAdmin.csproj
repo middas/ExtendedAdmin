@@ -41,6 +41,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\TShock\TShockAPI\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="ServerPointSystem, Version=1.4.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Tshock Server\ServerPlugins\ServerPointSystem.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -55,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DB\Raffle.cs" />
     <Compile Include="DB\RegionHelper.cs" />
     <Compile Include="ExtendedAdminConfig.cs" />
     <Compile Include="ExtendedFileTools.cs" />
@@ -64,6 +69,7 @@
     <Compile Include="ExtendedAdmin.cs" />
     <Compile Include="ExtendedPermissions.cs" />
     <Compile Include="ExtendedTSPlayer.cs" />
+    <Compile Include="RaffleHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TShock\TShockAPI\TShockAPI.csproj">
