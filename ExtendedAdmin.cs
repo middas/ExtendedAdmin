@@ -10,6 +10,7 @@ using System.Reflection;
 using System.IO;
 using System.IO.Streams;
 using ExtendedAdmin.DB;
+using CommonLibrary.Native;
 
 namespace ExtendedAdmin
 {
@@ -67,6 +68,8 @@ namespace ExtendedAdmin
             ServerHooks.Join += new Action<int, System.ComponentModel.HandledEventArgs>(ServerHooks_Join);
             NetHooks.GetData += new NetHooks.GetDataD(NetHooks_GetData);
             GameHooks.Update += new Action(GameHooks_Update);
+            ServerHooks.Chat += new Action<messageBuffer, int, string, HandledEventArgs>(ServerHooks_Chat);
+            ServerHooks.Command += new ServerHooks.CommandD(ServerHooks_Command);
 
             Commands.ChatCommands.Add(new Command(Permissions.manageregion, CommandHandlers.GetUserName, "username", "un"));
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.caninvincible, CommandHandlers.HandleInvincible, "invincible"));
@@ -77,6 +80,31 @@ namespace ExtendedAdmin
             Commands.ChatCommands.Add(new Command(CommandHandlers.BuyRaffleTicket, "buyraffleticket"));
             Commands.ChatCommands.Add(new Command(CommandHandlers.RaffleInfo, "raffleinfo"));
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.rafflemanager, CommandHandlers.StartRaffle, "startraffle"));
+        }
+
+        private void ServerHooks_Command(string cmd, HandledEventArgs e)
+        {
+            if (cmd.EqualsIgnoreCase("/reload"))
+            {
+                ExtendedFileTools.InitConfig();
+
+                Console.WriteLine("ExtendedAdmin config reloaded.");
+            }
+        }
+
+        private void ServerHooks_Chat(messageBuffer msg, int ply, string text, HandledEventArgs args)
+        {
+            if (text.EqualsIgnoreCase("/reload"))
+            {
+                var player = TShock.Players[ply];
+
+                if (player.Group.HasPermission(Permissions.cfg))
+                {
+                    ExtendedFileTools.InitConfig();
+
+                    player.SendMessage("ExtendedAdmin config reloaded.", Color.Green);
+                }
+            }
         }
 
         private void GameHooks_Update()

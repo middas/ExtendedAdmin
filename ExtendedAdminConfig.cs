@@ -29,6 +29,9 @@ namespace ExtendedAdmin
         [Description("Maximum number of raffle tickets")]
         public int MaxRaffleTickets = 500;
 
+        [Description("Ticket percentage kept")]
+        public float RaffleTicketsKept = 75f;
+
         public static ExtendedAdminConfig Read(string path)
         {
             if (!File.Exists(path))

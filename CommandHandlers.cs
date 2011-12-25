@@ -12,6 +12,61 @@ namespace ExtendedAdmin
 {
     public static class CommandHandlers
     {
+        #region Prison
+        public static void SendToPrison(CommandArgs args)
+        {
+        }
+
+        public static void ReleaseFromPrison(CommandArgs args)
+        {
+        }
+
+        public static void ClearPrison(CommandArgs args)
+        {
+        }
+
+        public static void ExtendSentence(CommandArgs args)
+        {
+            if (args.Parameters.Count < 2 || args.Parameters.Count > 2)
+            {
+                args.Player.SendMessage("Invalid syntax! Proper syntax: /extendsentence <player> <minutes>", Color.Red);
+                return;
+            }
+
+            var player = TShock.Utils.FindPlayer(args.Parameters[0]);
+
+            if (player.Count == 0)
+            {
+                args.Player.SendMessage("No player found with that query.", Color.Red);
+                return;
+            }
+
+            if (player.Count > 1)
+            {
+                args.Player.SendMessage("More than one player matched query.", Color.Red);
+                return;
+            }
+
+            if (args.Parameters[1].ToIntegerOrDefault(-1) < 1)
+            {
+                args.Player.SendMessage("Invalid number of minutes.", Color.Red);
+                return;
+            }
+
+            PrisonManager manager = new PrisonManager(TShock.DB);
+
+            if (manager.IPInPrison(player[0].IP))
+            {
+                manager.ExtendSentence(player[0], args.Parameters[1].ToIntegerOrDefault(-1));
+            }
+            else
+            {
+                args.Player.SendMessage("Player is not currently in prison.", Color.Red);
+                return;
+            }
+        }
+        #endregion
+
         #region Users
         public static void GetUserName(CommandArgs args)
         {
@@ -297,7 +352,7 @@ namespace ExtendedAdmin
 
             if (tickets.TicketCount + amount > ExtendedAdmin.Config.MaxRaffleTickets)
             {
-                args.Player.SendMessage(string.Format("You cannot have over {0} tickets.  You currently have {1}", ExtendedAdmin.Config.MaxRaffleTickets, tickets.TicketCount), Color.Red);
+                args.Player.SendMessage(string.Format("You cannot have over {0} tickets.  You currently have {1}.", ExtendedAdmin.Config.MaxRaffleTickets, tickets.TicketCount), Color.Red);
                 return;
             }
 

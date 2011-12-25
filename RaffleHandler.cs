@@ -69,7 +69,7 @@ namespace ExtendedAdmin
                 raffleValues.Add(null);
             }
 
-            raffleValues.Shuffle();
+            raffleValues = raffleValues.Shuffle().ToList();
 
             Random random = new Random();
 
@@ -82,15 +82,20 @@ namespace ExtendedAdmin
                 TShock.Utils.Broadcast(string.Format("Congratulations {0}, you are the winner of {1} shards!", winner, raffle.Pot), Color.GreenYellow);
                 TShock.Utils.Broadcast("A new raffle begins now!", Color.GreenYellow);
 
-                manager.Reward(winner, raffle.Pot);
+                var player = TShock.Players.Where(p => p!= null && p.UserAccountName == winner).SingleOrDefault();
+
+                manager.Reward(winner, player, raffle.Pot);
 
                 StartRaffle();
             }
             else
             {
                 manager.UpdateRaffleTime();
-                
+
+                manager.DecreaseTickets(ExtendedAdmin.Config.RaffleTicketsKept);
+
                 TShock.Utils.Broadcast(string.Format("There was no winner, {0} shards are now up for grabs!", raffle.Pot), Color.GreenYellow);
+                TShock.Utils.Broadcast(string.Format("{0}% of tickets were claimed by the raffle.  Remember to buy more!", (100f - ExtendedAdmin.Config.RaffleTicketsKept).ToString("F2")), Color.GreenYellow);
 
                 Update();
             }

@@ -205,7 +205,7 @@ namespace ExtendedAdmin.DB
 
                 using (var reader = _Connection.QueryReader("SELECT * FROM RaffleTicket WHERE RaffleID = @0", raffle.RaffleID))
                 {
-                    if (reader.Read())
+                    while (reader.Read())
                     {
                         raffleTickets.Add(new RaffleTicketHelper()
                         {
@@ -226,7 +226,7 @@ namespace ExtendedAdmin.DB
             return raffleTickets;
         }
 
-        public void Reward(string user, int amount)
+        public void Reward(string user, TSPlayer player, int amount)
         {
             var raffle = GetCurrentRaffle();
 
@@ -236,7 +236,18 @@ namespace ExtendedAdmin.DB
 
                 var account = GetServerPointAccounts(user);
 
-                _Connection.Query("UPDATE serverpointaccounts SET amount = @0 WHERE name = @1", account.Amount + amount, user);
+                if (player != null)
+                {
+                    ServerPointSystem.ServerPointSystem.Award(new CommandArgs("award", player, new List<string>()
+                    {
+                        player.Name,
+                        amount.ToString()
+                    }));
+                }
+                else
+                {
+                    _Connection.Query("UPDATE serverpointaccounts SET amount = @0 WHERE name = @1", account.Amount + amount, user);
+                }
             }
             catch (Exception ex)
             {
@@ -251,6 +262,29 @@ namespace ExtendedAdmin.DB
                 var raffle = GetCurrentRaffle();
 
                 _Connection.Query("UPDATE Raffle SET LastRaffle = @0 WHERE RaffleID = @1", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"), raffle.RaffleID);
+            }
+            catch (Exception ex)
+            {
+                ExtendedLog.Current.Log(ex.ToString());
+            }
+        }
+
+        public void DecreaseTickets(float percentKept)
+        {
+            try
+            {
+                var raffle = GetCurrentRaffle();
+
+                using (var reader = _Connection.QueryReader("SELECT * FROM RaffleTicket WHERE RaffleID = @0", raffle.RaffleID))
+                {
+                    while (reader.Read())
+                    {
+                        string user = reader.Get<string>("User");
+                        int ticketCount = reader.Get<int>("TicketCount");
+
+                        _Connection.Query("UPDATE RaffleTicket SET TicketCount = @0 WHERE User = @1", (int)(ticketCount * (percentKept / 100f)), user);
+                    }
+                }
             }
             catch (Exception ex)
             {
