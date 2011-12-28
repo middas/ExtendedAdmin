@@ -43,9 +43,15 @@ namespace ExtendedAdmin
                 return;
             }
 
+            ExtendedTSPlayer ePlayer = ExtendedAdmin.Players[player[0].Index];
+
+            ePlayer.InPrison = true;
+
             PrisonManager manager = new PrisonManager(TShock.DB);
 
             manager.AddPrisonRecord(player[0], DateTime.Now.AddMinutes(minutes));
+
+            UpdateGroup(player[0], player[0].UserAccountName, ExtendedAdmin.Config.PrisonGroup);
 
             args.Player.SendMessage("Player sent to prison.", Color.Green);
             player[0].SendMessage(string.Format("You have been sent to prison for {0} minutes", minutes), Color.Red);
@@ -66,6 +72,7 @@ namespace ExtendedAdmin
             if (prisoner != null)
             {
                 Release(manager, prisoner);
+
                 args.Player.SendMessage("Prisoner has been released.", Color.Green);
             }
             else
@@ -84,21 +91,32 @@ namespace ExtendedAdmin
             }
         }
 
-        private static void UpdateGroup(string user, string group)
+        private static void UpdateGroup(TSPlayer player, string user, string group)
         {
-            throw new NotImplementedException();
+            if (player != null)
+            {
+                player.Group = TShock.Utils.GetGroup(group);
+            }
+
+            var usr = TShock.Users.GetUserByName(user);
+
+            TShock.Users.SetUserGroup(usr, group);
         }
 
         private static void Release(PrisonManager manager, PrisonHelper prioner)
         {
             manager.Release(prioner.PrisonID);
 
-            UpdateGroup(prioner.User, prioner.Group);
-
             var player = TShock.Players.SingleOrDefault(p => p != null && p.UserAccountName == prioner.User);
+
+            UpdateGroup(player, prioner.User, prioner.Group);
 
             if (player != null)
             {
+                var ePlayer = ExtendedAdmin.Players[player.Index];
+
+                ePlayer.InPrison = false;
+
                 player.Teleport(Main.spawnTileX, Main.spawnTileY);
                 player.SendMessage("You have been freed from prison", Color.Green);
             }

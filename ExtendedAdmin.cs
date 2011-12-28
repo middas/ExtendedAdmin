@@ -205,6 +205,39 @@ namespace ExtendedAdmin
                     }
                 }
             }
+            else if (type == PacketTypes.PlayerUpdate)
+            {
+                using (MemoryStream ms = new MemoryStream(e.Msg.readBuffer, e.Index, e.Length))
+                {
+                    var plr = ms.ReadInt8();
+
+                    var extendedPlayer = ExtendedAdmin.Players[plr];
+
+                    if (extendedPlayer.InPrison)
+                    {
+                        var control = ms.ReadInt8();
+                        var item = ms.ReadInt8();
+                        var pos = new Vector2(ms.ReadSingle(), ms.ReadSingle());
+                        var vel = new Vector2(ms.ReadSingle(), ms.ReadSingle());
+
+                        float distance = Vector2.Distance(new Vector2((pos.X / 16f), (pos.Y / 16f)), new Vector2(Main.spawnTileX, Main.spawnTileY));
+                        if (distance > TShock.Config.MaxRangeForDisabled)
+                        {
+                            var warp = TShock.Warps.FindWarp(Config.PrisonWarp);
+                            if (warp.WarpPos != Vector2.Zero)
+                            {
+                                player.Player.Teleport((int)warp.WarpPos.X, (int)warp.WarpPos.Y + 3);
+                            }
+                            else
+                            {
+                                player.Player.Spawn();
+                            }
+
+                            player.Player.SendMessage("You are still serving your prison sentence.", Color.Yellow);
+                        }
+                    }
+                }
+            }
         }
 
         private void ServerHooks_Join(int ply, HandledEventArgs args)
@@ -213,6 +246,10 @@ namespace ExtendedAdmin
             var player = new ExtendedTSPlayer(tPlayer);
 
             Players[ply] = player;
+
+            PrisonManager prisonManager = new PrisonManager(TShock.DB);
+
+            player.InPrison = prisonManager.IPInPrison(tPlayer.IP);
         }
     }
 }

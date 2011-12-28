@@ -32,6 +32,12 @@ namespace ExtendedAdmin
         [Description("Ticket percentage kept")]
         public float RaffleTicketsKept = 75f;
 
+        [Description("The group players that are in prison are part of.")]
+        public string PrisonGroup = "Prison";
+
+        [Description("The name of the prison warp")]
+        public string PrisonWarp = "prison";
+
         public static ExtendedAdminConfig Read(string path)
         {
             if (!File.Exists(path))

@@ -16,6 +16,8 @@ namespace ExtendedAdmin
 
         public bool IsInvincible { get; set; }
 
+        public bool InPrison { get; set; }
+
         public ExtendedTSPlayer(TSPlayer ply)
         {
             Player = ply;
