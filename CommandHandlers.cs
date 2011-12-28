@@ -65,6 +65,7 @@ namespace ExtendedAdmin
 
             args.Player.SendMessage("Player sent to prison.", Color.Green);
             player[0].SendMessage(string.Format("You have been sent to prison for {0} minute(s)", minutes), Color.Red);
+            TShock.Utils.Broadcast(string.Format("{0} has been sent to prison!", player[0].Name), Color.Goldenrod);
         }
 
         public static void ReleaseFromPrison(CommandArgs args)
@@ -135,6 +136,7 @@ namespace ExtendedAdmin
 
                 player.Teleport(Main.spawnTileX, Main.spawnTileY);
                 player.SendMessage("You have been freed from prison", Color.Green);
+                TShock.Utils.Broadcast(string.Format("{0} has been released from prison!", player.Name), Color.Goldenrod);
             }
         }
 
@@ -175,6 +177,10 @@ namespace ExtendedAdmin
                 var ePlayer = ExtendedAdmin.Players[player[0].Index];
 
                 ePlayer.PrisonRecord.Until = ePlayer.PrisonRecord.Until.AddMinutes(args.Parameters[1].ToIntegerOrDefault(-1));
+
+                ePlayer.Player.SendMessage(string.Format("Your sentence has been extended by {0} minute(s)", args.Parameters[1].ToIntegerOrDefault(-1)), Color.Red);
+
+                TShock.Utils.Broadcast(string.Format("{0}'s sentence has been extended!", ePlayer.Player.Name), Color.Goldenrod);
             }
             else
             {
