@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TShockAPI;
+using ExtendedAdmin.DB;
 
 namespace ExtendedAdmin
 {
@@ -16,7 +17,11 @@ namespace ExtendedAdmin
 
         public bool IsInvincible { get; set; }
 
-        public bool InPrison { get; set; }
+        public PrisonHelper PrisonRecord
+        {
+            get;
+            set;
+        }
 
         public ExtendedTSPlayer(TSPlayer ply)
         {

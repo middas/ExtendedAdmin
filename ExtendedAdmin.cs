@@ -80,6 +80,10 @@ namespace ExtendedAdmin
             Commands.ChatCommands.Add(new Command(CommandHandlers.BuyRaffleTicket, "buyraffleticket"));
             Commands.ChatCommands.Add(new Command(CommandHandlers.RaffleInfo, "raffleinfo"));
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.rafflemanager, CommandHandlers.StartRaffle, "startraffle"));
+            Commands.ChatCommands.Add(new Command(ExtendedPermissions.prisonmanager, CommandHandlers.SendToPrison, "sendtoprison"));
+            Commands.ChatCommands.Add(new Command(ExtendedPermissions.prisonmanager, CommandHandlers.ReleaseFromPrison, "releaseprisoner"));
+            Commands.ChatCommands.Add(new Command(ExtendedPermissions.prisonmanager, CommandHandlers.ClearPrison, "clearprison"));
+            Commands.ChatCommands.Add(new Command(ExtendedPermissions.prisonmanager, CommandHandlers.ExtendSentence, "extendsentence"));
         }
 
         private void ServerHooks_Command(string cmd, HandledEventArgs e)
@@ -209,31 +213,67 @@ namespace ExtendedAdmin
             {
                 using (MemoryStream ms = new MemoryStream(e.Msg.readBuffer, e.Index, e.Length))
                 {
-                    var plr = ms.ReadInt8();
-
-                    var extendedPlayer = ExtendedAdmin.Players[plr];
-
-                    if (extendedPlayer.InPrison)
+                    if (player.PrisonRecord != null)
                     {
-                        var control = ms.ReadInt8();
-                        var item = ms.ReadInt8();
-                        var pos = new Vector2(ms.ReadSingle(), ms.ReadSingle());
-                        var vel = new Vector2(ms.ReadSingle(), ms.ReadSingle());
-
-                        float distance = Vector2.Distance(new Vector2((pos.X / 16f), (pos.Y / 16f)), new Vector2(Main.spawnTileX, Main.spawnTileY));
-                        if (distance > TShock.Config.MaxRangeForDisabled)
+                        if (!player.PrisonRecord.Released && player.PrisonRecord.Until <= DateTime.Now)
                         {
+                            CommandHandlers.ReleaseFromPrison(new CommandArgs("releaseprisoner", null, new List<string>()
+                            {
+                                player.Player.UserAccountName
+                            }));
+
+                            player.PrisonRecord = null;
+                        }
+                        else
+                        {
+                            var plr = ms.ReadInt8();
+                            var control = ms.ReadInt8();
+                            var item = ms.ReadInt8();
+                            var pos = new Vector2(ms.ReadSingle(), ms.ReadSingle());
+                            var vel = new Vector2(ms.ReadSingle(), ms.ReadSingle());
+
                             var warp = TShock.Warps.FindWarp(Config.PrisonWarp);
+
+                            float tilex;
+                            float tiley;
+
                             if (warp.WarpPos != Vector2.Zero)
                             {
-                                player.Player.Teleport((int)warp.WarpPos.X, (int)warp.WarpPos.Y + 3);
+                                tilex = (int)(warp.WarpPos.X);
+                                tiley = (int)(warp.WarpPos.Y);
                             }
                             else
                             {
-                                player.Player.Spawn();
+                                tilex = Main.spawnTileX;
+                                tiley = Main.spawnTileY;
                             }
 
-                            player.Player.SendMessage("You are still serving your prison sentence.", Color.Yellow);
+                            float distance = Vector2.Distance(new Vector2((pos.X / 16f), (pos.Y / 16f)), new Vector2(tilex, tiley));
+                            if (distance > TShock.Config.MaxRangeForDisabled)
+                            {
+                                if (warp.WarpPos != Vector2.Zero)
+                                {
+                                    player.Player.Teleport((int)warp.WarpPos.X, (int)warp.WarpPos.Y + 3);
+                                }
+                                else
+                                {
+                                    player.Player.Spawn();
+                                }
+
+                                TimeSpan remaining = player.PrisonRecord.Until - DateTime.Now;
+
+                                player.Player.SendMessage(string.Format("You are still serving your prison sentence. {0} hour(s) {1} minute(s) remain.", (int)remaining.TotalHours, remaining.Minutes), Color.Yellow);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (player.Player.Group.Name == Config.PrisonGroup)
+                        {
+                            CommandHandlers.ReleaseFromPrison(new CommandArgs("releaseprisoner", null, new List<string>()
+                            {
+                                player.Player.UserAccountName
+                            }));
                         }
                     }
                 }
@@ -249,7 +289,10 @@ namespace ExtendedAdmin
 
             PrisonManager prisonManager = new PrisonManager(TShock.DB);
 
-            player.InPrison = prisonManager.IPInPrison(tPlayer.IP);
+            if (prisonManager.IPInPrison(player.Player.IP))
+            {
+                player.PrisonRecord = prisonManager.GetPrisonRecordByIP(player.Player.IP);
+            }
         }
     }
 }

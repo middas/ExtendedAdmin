@@ -17,6 +17,9 @@ namespace ExtendedAdmin
         [Description("Raffle manager")]
         public static readonly string rafflemanager;
 
+        [Description("Prison manager")]
+        public static readonly string prisonmanager;
+
         static ExtendedPermissions()
         {
             foreach (var field in typeof(ExtendedPermissions).GetFields())

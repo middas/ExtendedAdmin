@@ -26,7 +26,7 @@ namespace ExtendedAdmin.DB
                 },
                 new SqlColumn("User", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
                 new SqlColumn("Until", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
-                new SqlColumn("Group", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
+                new SqlColumn("GroupName", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
                 new SqlColumn("IP", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
                 new SqlColumn("Released", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true });
 
@@ -51,7 +51,7 @@ namespace ExtendedAdmin.DB
                             PrisonID = reader.Get<int>("PrisonID"),
                             User = reader.Get<string>("User"),
                             Until = DateTime.Parse(reader.Get<string>("Until")),
-                            Group = reader.Get<string>("Group"),
+                            Group = reader.Get<string>("GroupName"),
                             IP = reader.Get<string>("IP"),
                             Released = bool.Parse(reader.Get<string>("Released"))
                         });
@@ -72,7 +72,7 @@ namespace ExtendedAdmin.DB
         {
             try
             {
-                _Connection.Query("INSERT INTO Prison (User, Until, Group, IP, Released) VALUES (@0, @1, @2, @3, @4)", player.UserAccountName, until.ToString("MM/dd/yyyy HH:mm:ss"), player.Group.Name, player.IP, false.ToString());
+                _Connection.Query("INSERT INTO Prison (User, Until, GroupName, IP, Released) VALUES (@0, @1, @2, @3, @4)", player.UserAccountName, until.ToString("MM/dd/yyyy HH:mm:ss"), player.Group.Name, player.IP, false.ToString());
             }
             catch (Exception ex)
             {
@@ -94,7 +94,7 @@ namespace ExtendedAdmin.DB
             }
         }
 
-        private PrisonHelper GetPrisonRecordByIP(string IP)
+        public PrisonHelper GetPrisonRecordByIP(string IP)
         {
             PrisonHelper helper = null;
 
@@ -111,7 +111,7 @@ namespace ExtendedAdmin.DB
                             PrisonID = reader.Get<int>("PrisonID"),
                             Until = DateTime.Parse(reader.Get<string>("Until")),
                             User = reader.Get<string>("User"),
-                            Group = reader.Get<string>("Group"),
+                            Group = reader.Get<string>("GroupName"),
                             IP = reader.Get<string>("IP"),
                             Released = bool.Parse(reader.Get<string>("Released"))
                         });
@@ -139,7 +139,7 @@ namespace ExtendedAdmin.DB
                     prisoners.Add(new PrisonHelper()
                     {
                         PrisonID = reader.Get<int>("PrisonID"),
-                        Group = reader.Get<string>("Group"),
+                        Group = reader.Get<string>("GroupName"),
                         IP = reader.Get<string>("IP"),
                         Released = bool.Parse(reader.Get<string>("Released")),
                         Until = DateTime.Parse(reader.Get<string>("Until")),
@@ -166,7 +166,7 @@ namespace ExtendedAdmin.DB
                 {
                     prisoner = new PrisonHelper()
                     {
-                        Group = reader.Get<string>("Group"),
+                        Group = reader.Get<string>("GroupName"),
                         IP = reader.Get<string>("IP"),
                         PrisonID = reader.Get<int>("PrisonID"),
                         Released = bool.Parse(reader.Get<string>("Released")),

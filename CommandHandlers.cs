@@ -17,7 +17,7 @@ namespace ExtendedAdmin
         {
             if (args.Parameters.Count < 2 || args.Parameters.Count > 2)
             {
-                args.Player.SendMessage("Invalid syntax! Proper syntax: /sendtoprison <user> <minutes>", Color.Red);
+                args.Player.SendMessage("Invalid syntax! Proper syntax: /sendtoprison <player> <minutes>", Color.Red);
                 return;
             }
 
@@ -45,16 +45,26 @@ namespace ExtendedAdmin
 
             ExtendedTSPlayer ePlayer = ExtendedAdmin.Players[player[0].Index];
 
-            ePlayer.InPrison = true;
-
             PrisonManager manager = new PrisonManager(TShock.DB);
 
             manager.AddPrisonRecord(player[0], DateTime.Now.AddMinutes(minutes));
 
             UpdateGroup(player[0], player[0].UserAccountName, ExtendedAdmin.Config.PrisonGroup);
 
+            ePlayer.PrisonRecord = manager.GetPrisonerUser(player[0].UserAccountName);
+
+            var warp = TShock.Warps.FindWarp(ExtendedAdmin.Config.PrisonWarp);
+            if (warp.WarpPos != Vector2.Zero)
+            {
+                player[0].Teleport((int)warp.WarpPos.X, (int)warp.WarpPos.Y + 3);
+            }
+            else
+            {
+                player[0].Spawn();
+            }
+
             args.Player.SendMessage("Player sent to prison.", Color.Green);
-            player[0].SendMessage(string.Format("You have been sent to prison for {0} minutes", minutes), Color.Red);
+            player[0].SendMessage(string.Format("You have been sent to prison for {0} minute(s)", minutes), Color.Red);
         }
 
         public static void ReleaseFromPrison(CommandArgs args)
@@ -73,11 +83,17 @@ namespace ExtendedAdmin
             {
                 Release(manager, prisoner);
 
-                args.Player.SendMessage("Prisoner has been released.", Color.Green);
+                if (args.Player != null)
+                {
+                    args.Player.SendMessage("Prisoner has been released.", Color.Green);
+                }
             }
             else
             {
-                args.Player.SendMessage("No prisoner matched your query", Color.Red);
+                if (args.Player != null)
+                {
+                    args.Player.SendMessage("No prisoner matched your query", Color.Red);
+                }
             }
         }
 
@@ -115,7 +131,7 @@ namespace ExtendedAdmin
             {
                 var ePlayer = ExtendedAdmin.Players[player.Index];
 
-                ePlayer.InPrison = false;
+                ePlayer.PrisonRecord = null;
 
                 player.Teleport(Main.spawnTileX, Main.spawnTileY);
                 player.SendMessage("You have been freed from prison", Color.Green);
@@ -155,6 +171,10 @@ namespace ExtendedAdmin
             if (manager.IPInPrison(player[0].IP))
             {
                 manager.ExtendSentence(player[0], args.Parameters[1].ToIntegerOrDefault(-1));
+
+                var ePlayer = ExtendedAdmin.Players[player[0].Index];
+
+                ePlayer.PrisonRecord.Until = ePlayer.PrisonRecord.Until.AddMinutes(args.Parameters[1].ToIntegerOrDefault(-1));
             }
             else
             {
