@@ -27,7 +27,8 @@ namespace ExtendedAdmin.DB
                 new SqlColumn("User", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
                 new SqlColumn("Until", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
                 new SqlColumn("Group", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
-                new SqlColumn("IP", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true });
+                new SqlColumn("IP", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
+                new SqlColumn("Released", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true });
 
             var creator = new SqlTableCreator(db, db.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
 
@@ -51,7 +52,8 @@ namespace ExtendedAdmin.DB
                             User = reader.Get<string>("User"),
                             Until = DateTime.Parse(reader.Get<string>("Until")),
                             Group = reader.Get<string>("Group"),
-                            IP = reader.Get<string>("IP")
+                            IP = reader.Get<string>("IP"),
+                            Released = bool.Parse(reader.Get<string>("Released"))
                         });
                     }
 
@@ -70,7 +72,7 @@ namespace ExtendedAdmin.DB
         {
             try
             {
-                _Connection.Query("INSERT INTO Prison (User, Until, Group, IP) VALUES (@0, @1, @2, @3)", player.UserAccountName, until.ToString("MM/dd/yyyy HH:mm:ss"), player.Group.Name, player.IP);
+                _Connection.Query("INSERT INTO Prison (User, Until, Group, IP, Released) VALUES (@0, @1, @2, @3, @4)", player.UserAccountName, until.ToString("MM/dd/yyyy HH:mm:ss"), player.Group.Name, player.IP, false.ToString());
             }
             catch (Exception ex)
             {
@@ -84,7 +86,7 @@ namespace ExtendedAdmin.DB
             {
                 var record = GetPrisonRecordByIP(player.IP);
 
-                _Connection.Query("UPDATE Prison SET Until = @0 WHERE PrisonID = @1", record.Until.AddMinutes(minutes).ToString("MM/dd/yyyy HH:mm:ss"), record.PrisonID);
+                _Connection.Query("UPDATE Prison SET Until = @0, Released = 'false' WHERE PrisonID = @1", record.Until.AddMinutes(minutes).ToString("MM/dd/yyyy HH:mm:ss"), record.PrisonID);
             }
             catch (Exception ex)
             {
@@ -110,7 +112,8 @@ namespace ExtendedAdmin.DB
                             Until = DateTime.Parse(reader.Get<string>("Until")),
                             User = reader.Get<string>("User"),
                             Group = reader.Get<string>("Group"),
-                            IP = reader.Get<string>("IP")
+                            IP = reader.Get<string>("IP"),
+                            Released = bool.Parse(reader.Get<string>("Released"))
                         });
                     }
 
@@ -124,6 +127,57 @@ namespace ExtendedAdmin.DB
 
             return helper;
         }
+
+        public List<PrisonHelper> GetAllCurrentPrisoners()
+        {
+            List<PrisonHelper> prisoners = new List<PrisonHelper>();
+
+            using (var reader = _Connection.QueryReader("SELECT * FROM Prison WHERE Released = 'false'"))
+            {
+                if (reader.Read())
+                {
+                    prisoners.Add(new PrisonHelper()
+                    {
+                        PrisonID = reader.Get<int>("PrisonID"),
+                        Group = reader.Get<string>("Group"),
+                        IP = reader.Get<string>("IP"),
+                        Released = bool.Parse(reader.Get<string>("Released")),
+                        Until = DateTime.Parse(reader.Get<string>("Until")),
+                        User = reader.Get<string>("User")
+                    });
+                }
+            }
+
+            return prisoners;
+        }
+
+        public void Release(int prisonID)
+        {
+            _Connection.Query("UPDATE Prison SET Released = 'true' WHERE PrisonID = @0", prisonID);
+        }
+
+        public PrisonHelper GetPrisonerUser(string user)
+        {
+            PrisonHelper prisoner = null;
+
+            using (var reader = _Connection.QueryReader("SELECT * FROM Prison WHERE User = @0 AND Released = 'false'", user))
+            {
+                if (reader.Read())
+                {
+                    prisoner = new PrisonHelper()
+                    {
+                        Group = reader.Get<string>("Group"),
+                        IP = reader.Get<string>("IP"),
+                        PrisonID = reader.Get<int>("PrisonID"),
+                        Released = bool.Parse(reader.Get<string>("Released")),
+                        Until = DateTime.Parse(reader.Get<string>("Until")),
+                        User = reader.Get<string>("User")
+                    };
+                }
+            }
+
+            return prisoner;
+        }
     }
 
     public class PrisonHelper
@@ -133,5 +187,6 @@ namespace ExtendedAdmin.DB
         public DateTime Until;
         public string Group;
         public string IP;
+        public bool Released;
     }
 }

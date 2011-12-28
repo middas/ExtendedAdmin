@@ -15,14 +15,93 @@ namespace ExtendedAdmin
         #region Prison
         public static void SendToPrison(CommandArgs args)
         {
+            if (args.Parameters.Count < 2 || args.Parameters.Count > 2)
+            {
+                args.Player.SendMessage("Invalid syntax! Proper syntax: /sendtoprison <user> <minutes>", Color.Red);
+                return;
+            }
+
+            var player = TShock.Utils.FindPlayer(args.Parameters[0]);
+
+            if (player == null || player.Count == 0)
+            {
+                args.Player.SendMessage("No player matched your query.", Color.Red);
+                return;
+            }
+
+            if (player.Count > 1)
+            {
+                args.Player.SendMessage("More than one player matched your query.", Color.Red);
+                return;
+            }
+
+            int minutes = args.Parameters[1].ToIntegerOrDefault(-1);
+
+            if (minutes < 1)
+            {
+                args.Player.SendMessage("Invalid number of minutes.", Color.Red);
+                return;
+            }
+
+            PrisonManager manager = new PrisonManager(TShock.DB);
+
+            manager.AddPrisonRecord(player[0], DateTime.Now.AddMinutes(minutes));
+
+            args.Player.SendMessage("Player sent to prison.", Color.Green);
+            player[0].SendMessage(string.Format("You have been sent to prison for {0} minutes", minutes), Color.Red);
         }
 
         public static void ReleaseFromPrison(CommandArgs args)
         {
+            if (args.Parameters.Count < 1 || args.Parameters.Count > 1)
+            {
+                args.Player.SendMessage("Invalid syntax! Proper syntax: /releaseprisoner <user>", Color.Red);
+                return;
+            }
+
+            PrisonManager manager = new PrisonManager(TShock.DB);
+
+            PrisonHelper prisoner = manager.GetPrisonerUser(args.Parameters[0]);
+
+            if (prisoner != null)
+            {
+                Release(manager, prisoner);
+                args.Player.SendMessage("Prisoner has been released.", Color.Green);
+            }
+            else
+            {
+                args.Player.SendMessage("No prisoner matched your query", Color.Red);
+            }
         }
 
         public static void ClearPrison(CommandArgs args)
         {
+            PrisonManager manager = new PrisonManager(TShock.DB);
+
+            foreach (PrisonHelper prioner in manager.GetAllCurrentPrisoners())
+            {
+                Release(manager, prioner);
+            }
+        }
+
+        private static void UpdateGroup(string user, string group)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void Release(PrisonManager manager, PrisonHelper prioner)
+        {
+            manager.Release(prioner.PrisonID);
+
+            UpdateGroup(prioner.User, prioner.Group);
+
+            var player = TShock.Players.SingleOrDefault(p => p != null && p.UserAccountName == prioner.User);
+
+            if (player != null)
+            {
+                player.Teleport(Main.spawnTileX, Main.spawnTileY);
+                player.SendMessage("You have been freed from prison", Color.Green);
+            }
         }
 
         public static void ExtendSentence(CommandArgs args)
