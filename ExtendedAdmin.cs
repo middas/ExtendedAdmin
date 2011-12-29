@@ -155,25 +155,6 @@ namespace ExtendedAdmin
                     }
                 }
             }
-            else if (type == PacketTypes.ChestGetContents)
-            {
-                if (player == null)
-                {
-                    e.Handled = false;
-                    return;
-                }
-
-                using (MemoryStream ms = new MemoryStream(e.Msg.readBuffer, e.Index, e.Length))
-                {
-                    int x = ms.ReadInt32();
-                    int y = ms.ReadInt32();
-                    if (!player.Player.Group.HasPermission(Permissions.editspawn) && !TShock.Regions.CanBuild(x, y, player.Player) && TShock.Regions.InArea(x, y))
-                    {
-                        player.Player.SendMessage(string.Format("Chests in region name: {0} are protected.", TShock.Regions.InAreaRegionName(x, y)), Color.Red);
-                        e.Handled = true;
-                    }
-                }
-            }
             else if (type == PacketTypes.DoorUse)
             {
                 if (player == null)
