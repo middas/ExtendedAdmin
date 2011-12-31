@@ -124,7 +124,7 @@ namespace ExtendedAdmin
         {
             manager.Release(prioner.PrisonID);
 
-            var player = TShock.Players.SingleOrDefault(p => p != null && p.UserAccountName == prioner.User);
+            var player = TShock.Players.FirstOrDefault(p => p != null && p.UserAccountName == prioner.User);
 
             UpdateGroup(player, prioner.User, prioner.Group);
 

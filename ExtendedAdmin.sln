@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TShockAPI", "..\TShock\TSho
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonLibrary", "..\Visual Studio 2008\Projects\CommonLibrary\CommonLibrary\CommonLibrary.csproj", "{DC3DD5C3-39DA-42B5-8B35-7BF7F41E6CE9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C3Mod", "..\TwitchysTShockPlugins\C3Mod\C3Mod.csproj", "{3889FD92-DA17-4D50-91D8-30D9E0B15F62}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,16 @@ Global
 		{DC3DD5C3-39DA-42B5-8B35-7BF7F41E6CE9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{DC3DD5C3-39DA-42B5-8B35-7BF7F41E6CE9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{DC3DD5C3-39DA-42B5-8B35-7BF7F41E6CE9}.Release|x86.ActiveCfg = Release|Any CPU
+		{3889FD92-DA17-4D50-91D8-30D9E0B15F62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3889FD92-DA17-4D50-91D8-30D9E0B15F62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3889FD92-DA17-4D50-91D8-30D9E0B15F62}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{3889FD92-DA17-4D50-91D8-30D9E0B15F62}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{3889FD92-DA17-4D50-91D8-30D9E0B15F62}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3889FD92-DA17-4D50-91D8-30D9E0B15F62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3889FD92-DA17-4D50-91D8-30D9E0B15F62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3889FD92-DA17-4D50-91D8-30D9E0B15F62}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3889FD92-DA17-4D50-91D8-30D9E0B15F62}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{3889FD92-DA17-4D50-91D8-30D9E0B15F62}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
