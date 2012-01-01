@@ -79,12 +79,14 @@ namespace ExtendedAdmin
 
             if (!winner.IsNullOrEmptyTrim())
             {
-                TShock.Utils.Broadcast(string.Format("Congratulations {0}, you are the winner of {1} shards!", winner, raffle.Pot), Color.GreenYellow);
+                var winnerTicket = raffleTickets.FirstOrDefault(t => t.User == winner);
+
+                TShock.Utils.Broadcast(string.Format("Congratulations {0}, you are the winner of {1} shards!", winnerTicket.Name, raffle.Pot), Color.GreenYellow);
                 TShock.Utils.Broadcast("A new raffle begins now!", Color.GreenYellow);
 
                 var player = TShock.Players.Where(p => p!= null && p.UserAccountName == winner).SingleOrDefault();
 
-                manager.Reward(winner, player, raffle.Pot);
+                manager.Reward(winnerTicket, player, raffle.Pot);
 
                 StartRaffle();
             }
@@ -112,6 +114,13 @@ namespace ExtendedAdmin
             TimeSpan nextRaffle = RaffleHandler.NextRaffleTime - DateTime.Now;
 
             TShock.Utils.Broadcast(string.Format("Current raffle pot: {0}! Next raffle in {1} minute(s) {2} second(s)!", raffle.Pot, (int)nextRaffle.TotalMinutes, (int)nextRaffle.Seconds));
+            
+            var lastRaffle = manager.GetLastRaffle();
+
+            if (lastRaffle != null)
+            {
+                TShock.Utils.Broadcast(string.Format("{0} won {1} in the last raffle!", lastRaffle.Winner, lastRaffle.Pot), Color.GreenYellow);
+            }
         }
     }
 }
