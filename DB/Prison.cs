@@ -134,7 +134,7 @@ namespace ExtendedAdmin.DB
 
             using (var reader = _Connection.QueryReader("SELECT * FROM Prison WHERE Released = 'false'"))
             {
-                if (reader.Read())
+                while (reader.Read())
                 {
                     prisoners.Add(new PrisonHelper()
                     {
