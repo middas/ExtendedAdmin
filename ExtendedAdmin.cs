@@ -67,6 +67,7 @@ namespace ExtendedAdmin
 
             ServerHooks.Join += new Action<int, System.ComponentModel.HandledEventArgs>(ServerHooks_Join);
             NetHooks.GetData += new NetHooks.GetDataD(NetHooks_GetData);
+            NetHooks.SendData += new NetHooks.SendDataD(NetHooks_SendData);
             GameHooks.Update += new Action(GameHooks_Update);
             ServerHooks.Chat += new Action<messageBuffer, int, string, HandledEventArgs>(ServerHooks_Chat);
             ServerHooks.Command += new ServerHooks.CommandD(ServerHooks_Command);
@@ -84,6 +85,47 @@ namespace ExtendedAdmin
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.prisonmanager, CommandHandlers.ReleaseFromPrison, "releaseprisoner"));
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.prisonmanager, CommandHandlers.ClearPrison, "clearprison"));
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.prisonmanager, CommandHandlers.ExtendSentence, "extendsentence"));
+            Commands.ChatCommands.Add(new Command(ExtendedPermissions.canghost, CommandHandlers.Ghost, "ghost"));
+        }
+
+        private void NetHooks_SendData(SendDataEventArgs e)
+        {
+            try
+            {
+                switch (e.MsgID)
+                {
+                    case PacketTypes.DoorUse:
+                    case PacketTypes.EffectHeal:
+                    case PacketTypes.EffectMana:
+                    case PacketTypes.PlayerDamage:
+                    case PacketTypes.Zones:
+                    case PacketTypes.PlayerAnimation:
+                    case PacketTypes.PlayerTeam:
+                    case PacketTypes.PlayerSpawn:
+                        if (Players.FirstOrDefault(p => p.Player.Index == e.number).IsGhost)
+                        {
+                            e.Handled = true;
+                        }
+                        break;
+                    case PacketTypes.ProjectileNew:
+                    case PacketTypes.ProjectileDestroy:
+                        if (Players.FirstOrDefault(p => p.Player.Index == e.ignoreClient).IsGhost)
+                        {
+                            e.Handled = true;
+                        }
+                        break;
+                }
+
+                if (e.number >= 0 && e.number <= 255 && Players.FirstOrDefault(p => p.Player.Index == e.number).IsGhost)
+                {
+                    e.Handled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ExtendedLog.Current.Log(ex.ToString());
+                Console.WriteLine("An exception occurred, see ExtendedAdmin.log for details.");
+            }
         }
 
         private void ServerHooks_Command(string cmd, HandledEventArgs e)
