@@ -92,6 +92,8 @@ namespace ExtendedAdmin
         {
             try
             {
+                var player = Players.FirstOrDefault(p => p != null && p.Player.Index == e.number);
+
                 switch (e.MsgID)
                 {
                     case PacketTypes.DoorUse:
@@ -102,21 +104,22 @@ namespace ExtendedAdmin
                     case PacketTypes.PlayerAnimation:
                     case PacketTypes.PlayerTeam:
                     case PacketTypes.PlayerSpawn:
-                        if (Players.FirstOrDefault(p => p.Player.Index == e.number).IsGhost)
+                        if (player != null && player.IsGhost)
                         {
                             e.Handled = true;
                         }
                         break;
                     case PacketTypes.ProjectileNew:
                     case PacketTypes.ProjectileDestroy:
-                        if (Players.FirstOrDefault(p => p.Player.Index == e.ignoreClient).IsGhost)
+                        var ignorePlayer = Players.FirstOrDefault(p => p != null && p.Player.Index == e.ignoreClient);
+                        if (ignorePlayer != null && ignorePlayer.IsGhost)
                         {
                             e.Handled = true;
                         }
                         break;
                 }
 
-                if (e.number >= 0 && e.number <= 255 && Players.FirstOrDefault(p => p.Player.Index == e.number).IsGhost)
+                if (e.number >= 0 && e.number <= 255 && player != null && player.IsGhost)
                 {
                     e.Handled = true;
                 }

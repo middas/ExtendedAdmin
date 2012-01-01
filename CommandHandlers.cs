@@ -495,34 +495,43 @@ namespace ExtendedAdmin
         #region Ghost
         public static void Ghost(CommandArgs args)
         {
-            // send the other players a team update so they can't track
-            int oldTeam = args.Player.Team;
+            var player = ExtendedAdmin.Players[args.Player.Index];
 
-            args.Player.TPlayer.team = 0;
+            if (!player.IsGhost)
+            {
+                // send the other players a team update so they can't track
+                int oldTeam = player.Player.Team;
 
-            NetMessage.SendData((int)PacketTypes.PlayerTeam, -1, -1, "", args.Player.Index);
+                player.Player.TPlayer.team = 0;
 
-            float oldX = args.Player.TPlayer.position.X;
-            float oldY = args.Player.TPlayer.position.Y;
+                NetMessage.SendData((int)PacketTypes.PlayerTeam, -1, -1, "", player.Player.Index);
 
-            // hide the ghosted player
-            args.Player.TPlayer.position.X = 0;
-            args.Player.TPlayer.position.Y = 0;
+                int oldX = player.Player.TileX;
+                int oldY = player.Player.TileY;
 
-            // send update to all players
-            NetMessage.SendData((int)PacketTypes.PlayerUpdate, -1, -1, "", args.Player.Index);
+                // hide the ghosted player
+                player.Player.Teleport(0, 0);
 
-            // set ghost
-            ExtendedAdmin.Players[args.Player.Index].IsGhost = true;
+                // send update to all players
+                NetMessage.SendData((int)PacketTypes.PlayerUpdate, -1, -1, "", player.Player.Index);
 
-            // not sure if this is needed yet
-            //// send the ghost back to original position
-            //args.Player.Teleport(oldX, oldY);
+                // set ghost
+                player.IsGhost = true;
 
-            // set the team back hiddenly
-            args.Player.TPlayer.team = oldTeam;
+                // send the ghost back to original position
+                args.Player.Teleport(oldX, oldY);
 
-            args.Player.SendMessage("You are now a ghost.", Color.Green);
+                // set the team back hiddenly
+                player.Player.TPlayer.team = oldTeam;
+
+                player.Player.SendMessage("You are now a ghost.", Color.Green);
+            }
+            else
+            {
+                player.IsGhost = false;
+
+                player.Player.SendMessage("You are no longer a ghost.", Color.Green);
+            }
         }
         #endregion
     }
