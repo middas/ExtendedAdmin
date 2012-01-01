@@ -34,7 +34,8 @@ namespace ExtendedAdmin.DB
             var raffleTicket = new SqlTable("RaffleTicket",
                 new SqlColumn("RaffleID", MySql.Data.MySqlClient.MySqlDbType.Int32),
                 new SqlColumn("User", MySql.Data.MySqlClient.MySqlDbType.Text),
-                new SqlColumn("TicketCount", MySql.Data.MySqlClient.MySqlDbType.Int32));
+                new SqlColumn("TicketCount", MySql.Data.MySqlClient.MySqlDbType.Int32),
+                new SqlColumn("Name", MySql.Data.MySqlClient.MySqlDbType.Text));
 
             creator.EnsureExists(raffleTicket);
         }
@@ -92,11 +93,11 @@ namespace ExtendedAdmin.DB
 
                     if (raffleTicket.Exists)
                     {
-                        _Connection.Query("UPDATE RaffleTicket SET TicketCount = @0 WHERE User = @1 AND RaffleID = @2", raffleTicket.TicketCount + amount, user, raffle.RaffleID);
+                        _Connection.Query("UPDATE RaffleTicket SET TicketCount = @0, Name=@3 WHERE User = @1 AND RaffleID = @2", raffleTicket.TicketCount + amount, user, raffle.RaffleID, player.Name);
                     }
                     else
                     {
-                        _Connection.Query("INSERT INTO RaffleTicket (RaffleID, User, TicketCount) VALUES (@0, @1, @2)", raffle.RaffleID, raffleTicket.User, amount);
+                        _Connection.Query("INSERT INTO RaffleTicket (RaffleID, User, TicketCount, Name) VALUES (@0, @1, @2, @3)", raffle.RaffleID, raffleTicket.User, amount, player.Name);
                     }
 
                     _Connection.Query("UPDATE Raffle SET Pot = @0 WHERE RaffleID = @1", raffle.Pot + cost, raffle.RaffleID);
@@ -154,7 +155,8 @@ namespace ExtendedAdmin.DB
                             RaffleID = reader.Get<int>("RaffleID"),
                             TicketCount = reader.Get<int>("TicketCount"),
                             User = reader.Get<string>("User"),
-                            Exists = true
+                            Exists = true,
+                            Name = reader.Get<string>("Name")
                         };
                     }
                     else
@@ -164,7 +166,8 @@ namespace ExtendedAdmin.DB
                             RaffleID = raffleID,
                             User = user,
                             TicketCount = 0,
-                            Exists = false
+                            Exists = false,
+                            Name = ""
                         };
                     }
                 }
@@ -212,7 +215,8 @@ namespace ExtendedAdmin.DB
                             RaffleID = reader.Get<int>("RaffleID"),
                             TicketCount = reader.Get<int>("TicketCount"),
                             User = reader.Get<string>("User"),
-                            Exists = true
+                            Exists = true,
+                            Name = reader.Get<string>("Name")
                         });
                     }
                 }
@@ -226,15 +230,15 @@ namespace ExtendedAdmin.DB
             return raffleTickets;
         }
 
-        public void Reward(string user, TSPlayer player, int amount)
+        public void Reward(RaffleTicketHelper winner, TSPlayer player, int amount)
         {
             var raffle = GetCurrentRaffle();
 
             try
             {
-                _Connection.Query("UPDATE Raffle SET Winner = @0, LastRaffle = @1 WHERE RaffleID = @2", user, DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"), raffle.RaffleID);
+                _Connection.Query("UPDATE Raffle SET Winner = @0, LastRaffle = @1 WHERE RaffleID = @2", winner.Name, DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"), raffle.RaffleID);
 
-                var account = GetServerPointAccounts(user);
+                var account = GetServerPointAccounts(winner.User);
 
                 if (player != null)
                 {
@@ -246,7 +250,7 @@ namespace ExtendedAdmin.DB
                 }
                 else
                 {
-                    _Connection.Query("UPDATE serverpointaccounts SET amount = @0 WHERE name = @1", account.Amount + amount, user);
+                    _Connection.Query("UPDATE serverpointaccounts SET amount = @0 WHERE name = @1", account.Amount + amount, winner.User);
                 }
             }
             catch (Exception ex)
@@ -291,6 +295,34 @@ namespace ExtendedAdmin.DB
                 ExtendedLog.Current.Log(ex.ToString());
             }
         }
+
+        public RaffleHelper GetLastRaffle()
+        {
+            RaffleHelper raffle = null;
+
+            try
+            {
+                using (var reader = _Connection.QueryReader("SELECT * FROM Raffle WHERE Winner IS NOT NULL ORDER BY RaffleID DESC LIMIT 0, 1"))
+                {
+                    if (reader.Read())
+                    {
+                        raffle = new RaffleHelper()
+                        {
+                            RaffleID = reader.Get<int>("RaffleID"),
+                            LastRaffle = DateTime.Parse(reader.Get<string>("LastRaffle")),
+                            Pot = reader.Get<int>("Pot"),
+                            Winner = reader.Get<string>("Winner")
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ExtendedLog.Current.Log(ex.ToString());
+            }
+
+            return raffle;
+        }
     }
 
     public class RaffleHelper
@@ -307,6 +339,7 @@ namespace ExtendedAdmin.DB
         public string User;
         public int TicketCount;
         public bool Exists;
+        public string Name;
     }
 
     public class ServerPointAccountsHelper

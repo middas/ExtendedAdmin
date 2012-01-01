@@ -562,5 +562,51 @@ namespace ExtendedAdmin
             args.Player.SendMessage(string.Format("{0} was successfully teleported to {1}.", player[0].Name, target[0].Name), Color.Green);
         }
         #endregion
+
+        #region BuffAll
+        public static void BuffAll(CommandArgs args)
+        {
+            if (args.Parameters.Count > 1)
+            {
+                args.Player.SendMessage("Invalid syntax! Proper syntax: /buffall <player>", Color.Red);
+                return;
+            }
+
+            TSPlayer player;
+
+            if (args.Parameters.Count == 1)
+            {
+                var players = TShock.Utils.FindPlayer(args.Parameters[0]);
+
+                if (players.Count > 1)
+                {
+                    args.Player.SendMessage("More than one player matched your query.", Color.Red);
+                    return;
+                }
+
+                if (players == null || players.Count == 0)
+                {
+                    args.Player.SendMessage("No players matched your query.", Color.Red);
+                    return;
+                }
+
+                player = players[0];
+            }
+            else
+            {
+                player = args.Player;
+            }
+
+            if (!player.RealPlayer)
+            {
+                args.Player.SendMessage("You must be logged in to buff yourself.", Color.Red);
+                return;
+            }
+
+            int[] buffs = new int[] { 1, 2, 3, 5, 6, 7, 12, 14, 16, 26, 29 };
+
+            buffs.ForEach(b => player.SetBuff(b, 500 * 60));
+        }
+        #endregion
     }
 }

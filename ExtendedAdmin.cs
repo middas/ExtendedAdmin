@@ -87,6 +87,7 @@ namespace ExtendedAdmin
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.prisonmanager, CommandHandlers.ExtendSentence, "extendsentence"));
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.canghost, CommandHandlers.Ghost, "ghost"));
             Commands.ChatCommands.Add(new Command(Permissions.tphere, CommandHandlers.TpTo, "tpto"));
+            Commands.ChatCommands.Add(new Command(Permissions.buffplayer, CommandHandlers.BuffAll, "buffall", "ba"));
         }
 
         private void NetHooks_SendData(SendDataEventArgs e)
