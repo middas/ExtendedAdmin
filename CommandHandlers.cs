@@ -491,5 +491,48 @@ namespace ExtendedAdmin
             }
         }
         #endregion
+
+        #region Ghost
+        public static void Ghost(CommandArgs args)
+        {
+            var player = ExtendedAdmin.Players[args.Player.Index];
+
+            if (!player.IsGhost)
+            {
+                // send the other players a team update so they can't track
+                int oldTeam = player.Player.Team;
+
+                player.Player.TPlayer.team = 0;
+
+                NetMessage.SendData((int)PacketTypes.PlayerTeam, -1, -1, "", player.Player.Index);
+
+                int oldX = player.Player.TileX;
+                int oldY = player.Player.TileY;
+
+                // hide the ghosted player
+                player.Player.Teleport(0, 0);
+
+                // send update to all players
+                NetMessage.SendData((int)PacketTypes.PlayerUpdate, -1, -1, "", player.Player.Index);
+
+                // set ghost
+                player.IsGhost = true;
+
+                // send the ghost back to original position
+                args.Player.Teleport(oldX, oldY);
+
+                // set the team back hiddenly
+                player.Player.TPlayer.team = oldTeam;
+
+                player.Player.SendMessage("You are now a ghost.", Color.Green);
+            }
+            else
+            {
+                player.IsGhost = false;
+
+                player.Player.SendMessage("You are no longer a ghost.", Color.Green);
+            }
+        }
+        #endregion
     }
 }

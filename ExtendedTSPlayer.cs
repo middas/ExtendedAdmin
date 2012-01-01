@@ -16,12 +16,8 @@ namespace ExtendedAdmin
         }
 
         public bool IsInvincible { get; set; }
-
-        public PrisonHelper PrisonRecord
-        {
-            get;
-            set;
-        }
+        public PrisonHelper PrisonRecord { get; set; }
+        public bool IsGhost { get; set; }
 
         public ExtendedTSPlayer(TSPlayer ply)
         {

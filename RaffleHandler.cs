@@ -73,7 +73,7 @@ namespace ExtendedAdmin
 
             Random random = new Random();
 
-            var winner = raffleValues[random.Next(0, ExtendedAdmin.Config.RaffleOdds - 1)];
+            var winner = raffleValues[random.Next(0, raffleValues.Count - 1)];
 
             var raffle = manager.GetCurrentRaffle();
 
