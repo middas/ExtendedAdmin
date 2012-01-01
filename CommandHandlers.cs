@@ -499,30 +499,12 @@ namespace ExtendedAdmin
 
             if (!player.IsGhost)
             {
-                // send the other players a team update so they can't track
-                int oldTeam = player.Player.Team;
-
                 player.Player.TPlayer.team = 0;
 
                 NetMessage.SendData((int)PacketTypes.PlayerTeam, -1, -1, "", player.Player.Index);
 
-                int oldX = player.Player.TileX;
-                int oldY = player.Player.TileY;
-
-                // hide the ghosted player
-                player.Player.Teleport(0, 0);
-
-                // send update to all players
-                NetMessage.SendData((int)PacketTypes.PlayerUpdate, -1, -1, "", player.Player.Index);
-
                 // set ghost
                 player.IsGhost = true;
-
-                // send the ghost back to original position
-                args.Player.Teleport(oldX, oldY);
-
-                // set the team back hiddenly
-                player.Player.TPlayer.team = oldTeam;
 
                 player.Player.SendMessage("You are now a ghost.", Color.Green);
             }
@@ -532,6 +514,52 @@ namespace ExtendedAdmin
 
                 player.Player.SendMessage("You are no longer a ghost.", Color.Green);
             }
+        }
+        #endregion
+
+        #region TpTo
+        public static void TpTo(CommandArgs args)
+        {
+            if (args.Parameters.Count < 2 || args.Parameters.Count > 2)
+            {
+                args.Player.SendMessage("Invalid syntax! Proper syntax: /tpto <target> <player>", Color.Red);
+                return;
+            }
+
+            var target = TShock.Utils.FindPlayer(args.Parameters[0]);
+
+            if (target == null || target.Count == 0)
+            {
+                args.Player.SendMessage("Invalid target, no player matched query.", Color.Red);
+                return;
+            }
+
+            var player = TShock.Utils.FindPlayer(args.Parameters[1]);
+
+            if (player == null || target.Count == 0)
+            {
+                args.Player.SendMessage("Invalid player, no player matched query.", Color.Red);
+                return;
+            }
+
+            if (target.Count > 1)
+            {
+                args.Player.SendMessage("More than one target matched your query.", Color.Red);
+                return;
+            }
+
+            if (player.Count > 1)
+            {
+                args.Player.SendMessage("More than one player matched your query.", Color.Red);
+                return;
+            }
+
+            player[0].Teleport(target[0].TileX, target[0].TileY);
+
+            target[0].SendMessage(string.Format("{0} has been teleported to you.", player[0].Name), Color.Green);
+            player[0].SendMessage(string.Format("You have been teleported to {0}.", target[0].Name), Color.Green);
+
+            args.Player.SendMessage(string.Format("{0} was successfully teleported to {1}.", player[0].Name, target[0].Name), Color.Green);
         }
         #endregion
     }
