@@ -491,5 +491,11 @@ namespace ExtendedAdmin
             }
         }
         #endregion
+
+        #region Ghost
+        public static void Ghost(CommandArgs args)
+        {
+        }
+        #endregion
     }
 }
