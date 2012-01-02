@@ -1,3 +1,4 @@
 *.orig
 bin/
 obj/
+*.suo
