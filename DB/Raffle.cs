@@ -230,15 +230,15 @@ namespace ExtendedAdmin.DB
             return raffleTickets;
         }
 
-        public void Reward(RaffleTicketHelper winner, TSPlayer player, int amount)
+        public void Reward(string user, TSPlayer player, int amount)
         {
             var raffle = GetCurrentRaffle();
 
             try
             {
-                _Connection.Query("UPDATE Raffle SET Winner = @0, LastRaffle = @1 WHERE RaffleID = @2", winner.Name, DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"), raffle.RaffleID);
+                _Connection.Query("UPDATE Raffle SET Winner = @0, LastRaffle = @1 WHERE RaffleID = @2", user, DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"), raffle.RaffleID);
 
-                var account = GetServerPointAccounts(winner.User);
+                var account = GetServerPointAccounts(user);
 
                 if (player != null)
                 {
@@ -250,7 +250,7 @@ namespace ExtendedAdmin.DB
                 }
                 else
                 {
-                    _Connection.Query("UPDATE serverpointaccounts SET amount = @0 WHERE name = @1", account.Amount + amount, winner.User);
+                    _Connection.Query("UPDATE serverpointaccounts SET amount = @0 WHERE name = @1", account.Amount + amount, user);
                 }
             }
             catch (Exception ex)
