@@ -20,6 +20,12 @@ namespace ExtendedAdmin
         [Description("Prison manager")]
         public static readonly string prisonmanager;
 
+        [Description("PVPHeal")]
+        public static readonly string pvpheal;
+
+        [Description("PVPBuff")]
+        public static readonly string pvpbuff;
+
         static ExtendedPermissions()
         {
             foreach (var field in typeof(ExtendedPermissions).GetFields())
