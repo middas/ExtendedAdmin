@@ -88,6 +88,8 @@ namespace ExtendedAdmin
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.canghost, CommandHandlers.Ghost, "ghost"));
             Commands.ChatCommands.Add(new Command(Permissions.tphere, CommandHandlers.TpTo, "tpto"));
             Commands.ChatCommands.Add(new Command(Permissions.buffplayer, CommandHandlers.BuffAll, "buffall", "ba"));
+            Commands.ChatCommands.Add(new Command(ExtendedPermissions.pvpbuff, CommandHandlers.Buff, "selfbuff"));
+            Commands.ChatCommands.Add(new Command(ExtendedPermissions.pvpheal, CommandHandlers.Heal, "selfheal"));
         }
 
         private void NetHooks_SendData(SendDataEventArgs e)

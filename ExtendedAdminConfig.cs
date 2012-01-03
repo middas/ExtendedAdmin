@@ -38,6 +38,9 @@ namespace ExtendedAdmin
         [Description("The name of the prison warp")]
         public string PrisonWarp = "prison";
 
+        [Description("Shards deducted when sent to prison")]
+        public int PrisonShards = 5000;
+
         public static ExtendedAdminConfig Read(string path)
         {
             if (!File.Exists(path))

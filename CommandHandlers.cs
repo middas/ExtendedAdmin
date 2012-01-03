@@ -49,6 +49,12 @@ namespace ExtendedAdmin
 
             manager.AddPrisonRecord(player[0], DateTime.Now.AddMinutes(minutes));
 
+            ServerPointSystem.ServerPointSystem.Deduct(new CommandArgs("deduct", player[0], new List<string>()
+            {
+                player[0].Name,
+                ExtendedAdmin.Config.PrisonShards.ToString()
+            }));
+
             UpdateGroup(player[0], player[0].UserAccountName, ExtendedAdmin.Config.PrisonGroup);
 
             ePlayer.PrisonRecord = manager.GetPrisonerUser(player[0].UserAccountName);
@@ -606,6 +612,76 @@ namespace ExtendedAdmin
             int[] buffs = new int[] { 1, 2, 3, 5, 6, 7, 12, 14, 16, 26, 29 };
 
             buffs.ForEach(b => player.SetBuff(b, 500 * 60));
+        }
+        #endregion
+
+        #region PVP Save Commands
+        public static void Heal(CommandArgs args)
+        {
+            if (args.Player.TPlayer.hostile)
+            {
+                args.Player.SendMessage("You do not have access to this command while PVPing", Color.Red);
+                return;
+            }
+
+            Item heart = TShock.Utils.GetItemById(58);
+            Item star = TShock.Utils.GetItemById(184);
+            for (int i = 0; i < 20; i++)
+                args.Player.GiveItem(heart.type, heart.name, heart.width, heart.height, heart.maxStack);
+            for (int i = 0; i < 10; i++)
+                args.Player.GiveItem(star.type, star.name, star.width, star.height, star.maxStack);
+
+            args.Player.SendMessage("You just got healed!", Color.Green);
+        }
+
+        public static void Buff(CommandArgs args)
+        {
+            if (args.Player.TPlayer.hostile)
+            {
+                args.Player.SendMessage("You do not have access to this command while PVPing", Color.Red);
+                return;
+            }
+
+            int id = 0;
+            int time = 60;
+            if (!int.TryParse(args.Parameters[0], out id))
+            {
+                var found = TShock.Utils.GetBuffByName(args.Parameters[0]);
+                if (found.Count == 0)
+                {
+                    args.Player.SendMessage("Invalid buff name!", Color.Red);
+                    return;
+                }
+                else if (found.Count > 1)
+                {
+                    args.Player.SendMessage(string.Format("More than one ({0}) buff matched!", found.Count), Color.Red);
+                    return;
+                }
+                id = found[0];
+            }
+
+            if (args.Parameters.Count == 2)
+            {
+                int.TryParse(args.Parameters[1], out time);
+            }
+
+            if (id > 0 && id < Main.maxBuffs)
+            {
+                if (time < 0 || time > short.MaxValue)
+                {
+                    time = 60;
+                }
+
+                args.Player.SetBuff(id, time * 60);
+                args.Player.SendMessage(string.Format("You have buffed yourself with {0}({1}) for {2} seconds!",
+                                                      TShock.Utils.GetBuffName(id), TShock.Utils.GetBuffDescription(id), (time)),
+                                        Color.Green);
+            }
+            else
+            {
+                args.Player.SendMessage("Invalid buff ID!", Color.Red);
+            }
+
         }
         #endregion
     }
