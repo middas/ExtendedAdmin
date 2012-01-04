@@ -8,31 +8,35 @@ using TShockAPI;
 
 namespace ExtendedAdmin.DB
 {
-    public class PrisonManager
+    public class PrisonManager : IBaseTable
     {
         private IDbConnection _Connection;
 
         public PrisonManager(IDbConnection db)
         {
             _Connection = db;
+        }
 
+        public void InitializeTable()
+        {
             var table = new SqlTable("Prison",
-                new SqlColumn("PrisonID", MySql.Data.MySqlClient.MySqlDbType.Int32)
-                {
-                    AutoIncrement = true,
-                    NotNull = true,
-                    Primary = true,
-                    Unique = true
-                },
-                new SqlColumn("User", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
-                new SqlColumn("Until", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
-                new SqlColumn("GroupName", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
-                new SqlColumn("IP", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
-                new SqlColumn("Released", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true });
+            new SqlColumn("PrisonID", MySql.Data.MySqlClient.MySqlDbType.Int32)
+            {
+                AutoIncrement = true,
+                NotNull = true,
+                Primary = true,
+                Unique = true
+            },
+            new SqlColumn("User", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
+            new SqlColumn("Until", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
+            new SqlColumn("GroupName", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
+            new SqlColumn("IP", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true },
+            new SqlColumn("Released", MySql.Data.MySqlClient.MySqlDbType.Text) { NotNull = true });
 
-            var creator = new SqlTableCreator(db, db.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
+            var creator = new SqlTableCreator(_Connection, _Connection.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
 
             creator.EnsureExists(table);
+
         }
 
         public bool IPInPrison(string ip)

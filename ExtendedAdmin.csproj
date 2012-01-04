@@ -12,6 +12,7 @@
     <AssemblyName>ExtendedAdmin</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -24,7 +25,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -75,9 +75,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BankHandler.cs" />
+    <Compile Include="DB\Bank.cs" />
+    <Compile Include="DB\IBaseTable.cs" />
     <Compile Include="DB\Prison.cs" />
     <Compile Include="DB\Raffle.cs" />
     <Compile Include="DB\RegionHelper.cs" />
+    <Compile Include="DB\SqlTableFactory.cs" />
     <Compile Include="ExtendedAdminConfig.cs" />
     <Compile Include="ExtendedFileTools.cs" />
     <Compile Include="ExtendedLog.cs" />
