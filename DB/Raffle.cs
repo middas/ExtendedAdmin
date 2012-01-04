@@ -43,7 +43,7 @@ namespace ExtendedAdmin.DB
                 new SqlColumn("RaffleID", MySql.Data.MySqlClient.MySqlDbType.Int32),
                 new SqlColumn("User", MySql.Data.MySqlClient.MySqlDbType.Text),
                 new SqlColumn("TicketCount", MySql.Data.MySqlClient.MySqlDbType.Int32),
-                new SqlColumn("Character", MySql.Data.MySqlClient.MySqlDbType.Text));
+                new SqlColumn("CharacterName", MySql.Data.MySqlClient.MySqlDbType.Text));
 
             creator.EnsureExists(raffleTicket);
         }
@@ -101,11 +101,11 @@ namespace ExtendedAdmin.DB
 
                     if (raffleTicket.Exists)
                     {
-                        _Connection.Query("UPDATE RaffleTicket SET TicketCount = @0, Character = @1 WHERE User = @2 AND RaffleID = @3", raffleTicket.TicketCount + amount, player.Name, user, raffle.RaffleID);
+                        _Connection.Query("UPDATE RaffleTicket SET TicketCount = @0, CharacterName = @1 WHERE User = @2 AND RaffleID = @3", raffleTicket.TicketCount + amount, player.Name, user, raffle.RaffleID);
                     }
                     else
                     {
-                        _Connection.Query("INSERT INTO RaffleTicket (RaffleID, User, TicketCount, Character) VALUES (@0, @1, @2, @3)", raffle.RaffleID, raffleTicket.User, amount, player.Name);
+                        _Connection.Query("INSERT INTO RaffleTicket (RaffleID, User, TicketCount, CharacterName) VALUES (@0, @1, @2, @3)", raffle.RaffleID, raffleTicket.User, amount, player.Name);
                     }
 
                     _Connection.Query("UPDATE Raffle SET Pot = @0 WHERE RaffleID = @1", raffle.Pot + cost, raffle.RaffleID);
@@ -164,7 +164,7 @@ namespace ExtendedAdmin.DB
                             TicketCount = reader.Get<int>("TicketCount"),
                             User = reader.Get<string>("User"),
                             Exists = true,
-                            Character = reader.Get<string>("Character")
+                            CharacterName = reader.Get<string>("CharacterName")
                         };
                     }
                     else
@@ -175,7 +175,7 @@ namespace ExtendedAdmin.DB
                             User = user,
                             TicketCount = 0,
                             Exists = false,
-                            Character = ""
+                            CharacterName = ""
                         };
                     }
                 }
@@ -224,7 +224,7 @@ namespace ExtendedAdmin.DB
                             TicketCount = reader.Get<int>("TicketCount"),
                             User = reader.Get<string>("User"),
                             Exists = true,
-                            Character = reader.Get<string>("Character")
+                            CharacterName = reader.Get<string>("CharacterName")
                         });
                     }
                 }
@@ -347,7 +347,7 @@ namespace ExtendedAdmin.DB
         public string User;
         public int TicketCount;
         public bool Exists;
-        public string Character;
+        public string CharacterName;
     }
 
     public class ServerPointAccountsHelper
