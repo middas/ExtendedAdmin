@@ -19,7 +19,6 @@ namespace ExtendedAdmin
     {
         public static ExtendedTSPlayer[] Players = new ExtendedTSPlayer[Main.maxPlayers];
         public static ExtendedAdminConfig Config;
-        public static RaffleHandler Raffle;
 
         public ExtendedAdmin(Terraria.Main game) :
             base(game)
@@ -63,7 +62,10 @@ namespace ExtendedAdmin
         {
             ExtendedFileTools.InitConfig();
 
-            Raffle = new RaffleHandler();
+            SqlTableFactory.GetInstance<BankManager>(TShock.DB).InitializeTable();
+            SqlTableFactory.GetInstance<PrisonManager>(TShock.DB).InitializeTable();
+            SqlTableFactory.GetInstance<RaffleManager>(TShock.DB).InitializeTable();
+            SqlTableFactory.GetInstance<RegionHelperManager>(TShock.DB).InitializeTable();
 
             ServerHooks.Join += new Action<int, System.ComponentModel.HandledEventArgs>(ServerHooks_Join);
             NetHooks.GetData += new NetHooks.GetDataD(NetHooks_GetData);
@@ -164,12 +166,12 @@ namespace ExtendedAdmin
         {
             if (RaffleHandler.NextRaffleTime <= DateTime.Now)
             {
-                Raffle.BeginRaffle();
+                RaffleHandler.BeginRaffle();
             }
 
             if (RaffleHandler.NextRaffleUpdate <= DateTime.Now)
             {
-                Raffle.Update();
+                RaffleHandler.Update();
             }
         }
 

@@ -412,7 +412,7 @@ namespace ExtendedAdmin
         #region Raffle
         public static void StartRaffle(CommandArgs args)
         {
-            ExtendedAdmin.Raffle.BeginRaffle();
+            RaffleHandler.BeginRaffle();
         }
 
         public static void RaffleInfo(CommandArgs args)

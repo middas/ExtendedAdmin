@@ -21,7 +21,7 @@ namespace ExtendedAdmin
             NextRaffleUpdate = DateTime.Now;
         }
 
-        private void StartRaffle()
+        private static void StartRaffle()
         {
             RaffleManager manager = new RaffleManager(TShock.DB);
 
@@ -39,14 +39,14 @@ namespace ExtendedAdmin
             }
         }
 
-        public void BeginRaffle()
+        public static void BeginRaffle()
         {
             NextRaffleTime = DateTime.Now.AddMinutes(ExtendedAdmin.Config.RaffleDuration);
 
             ThreadPool.QueueUserWorkItem(ExecuteRaffle);
         }
 
-        private void ExecuteRaffle(object o)
+        private static void ExecuteRaffle(object o)
         {
             TShock.Utils.Broadcast("Raffle beginning!", Color.GreenYellow);
 
@@ -103,7 +103,7 @@ namespace ExtendedAdmin
             }
         }
 
-        public void Update()
+        public static void Update()
         {
             RaffleHandler.NextRaffleUpdate = DateTime.Now.AddMinutes(ExtendedAdmin.Config.RaffleUpdateDuration);
 

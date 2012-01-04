@@ -7,19 +7,23 @@ using TShockAPI.DB;
 
 namespace ExtendedAdmin.DB
 {
-    public class BankManager
+    public class BankManager : IBaseTable
     {
         private IDbConnection _Connection;
 
         public BankManager(IDbConnection db)
         {
             _Connection = db;
+        }
 
+        public void InitializeTable()
+        {
             var table = new SqlTable("Bank",
-                new SqlColumn("User", MySql.Data.MySqlClient.MySqlDbType.Text) { Unique = true, Primary = true },
+                new SqlColumn("BankID", MySql.Data.MySqlClient.MySqlDbType.Int32) { Unique = true, Primary = true, AutoIncrement = true },
+                new SqlColumn("User", MySql.Data.MySqlClient.MySqlDbType.Text),
                 new SqlColumn("Amount", MySql.Data.MySqlClient.MySqlDbType.Int32));
 
-            var creator = new SqlTableCreator(db, db.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
+            var creator = new SqlTableCreator(_Connection, _Connection.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
 
             creator.EnsureExists(table);
         }

@@ -8,19 +8,22 @@ using ExtendedAdmin;
 
 namespace ExtendedAdmin.DB
 {
-    public class RegionHelperManager
+    public class RegionHelperManager : IBaseTable
     {
         private IDbConnection _Connection;
 
         public RegionHelperManager(IDbConnection db)
         {
             _Connection = db;
+        }
 
+        public void InitializeTable()
+        {
             var table = new SqlTable("RegionHelper",
                 new SqlColumn("RegionName", MySql.Data.MySqlClient.MySqlDbType.Text),
                 new SqlColumn("IsLocked", MySql.Data.MySqlClient.MySqlDbType.Text));
 
-            var creator = new SqlTableCreator(db, db.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
+            var creator = new SqlTableCreator(_Connection, _Connection.GetSqlType() == SqlType.Sqlite ? (IQueryBuilder)new SqliteQueryCreator() : new MysqlQueryCreator());
             creator.EnsureExists(table);
         }
 
