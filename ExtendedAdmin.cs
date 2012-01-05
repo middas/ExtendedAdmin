@@ -62,7 +62,7 @@ namespace ExtendedAdmin
         {
             ExtendedFileTools.InitConfig();
 
-            SqlTableFactory.GetInstance<BankManager>(TShock.DB).InitializeTable();
+            //SqlTableFactory.GetInstance<BankManager>(TShock.DB).InitializeTable();
             SqlTableFactory.GetInstance<PrisonManager>(TShock.DB).InitializeTable();
             SqlTableFactory.GetInstance<RaffleManager>(TShock.DB).InitializeTable();
             SqlTableFactory.GetInstance<RegionHelperManager>(TShock.DB).InitializeTable();
@@ -222,7 +222,7 @@ namespace ExtendedAdmin
 
                     RegionHelperManager regionHelper = new RegionHelperManager(TShock.DB);
 
-                    if (!player.Player.Group.HasPermission(Permissions.editspawn) && !TShock.Regions.CanBuild(x, y, player.Player) && TShock.Regions.InArea(x, y) && regionHelper.GetRegionHelperByRegion(TShock.Regions.InAreaRegionName(x, y)).IsLocked)
+                    if (!player.Player.Group.HasPermission(Permissions.editspawn) && !TShock.Regions.CanBuild(x, y, player.Player) && TShock.Regions.InArea(x, y) && regionHelper.GetRegionHelperByRegion(TShock.Regions.InAreaRegionName(x, y)).ContainsProperty(r => r.IsLocked))
                     {
                         int size = 10;
 
@@ -235,7 +235,7 @@ namespace ExtendedAdmin
 
                         player.Player.Teleport(warpX, player.Player.TileY + 3);
 
-                        player.Player.SendMessage(string.Format("Doors in region name: {0} are locked.", TShock.Regions.InAreaRegionName(x, y)), Color.Red);
+                        player.Player.SendMessage(string.Format("Doors in region name: {0} are locked.", string.Join(", ", TShock.Regions.InAreaRegionName(x, y))), Color.Red);
 
                         e.Handled = true;
                     }

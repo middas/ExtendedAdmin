@@ -305,7 +305,7 @@ namespace ExtendedAdmin
                 return;
             }
 
-            Region region;
+            Region region = null;
 
             if (args.Parameters.Count > 0)
             {
@@ -319,7 +319,20 @@ namespace ExtendedAdmin
                     return;
                 }
 
-                region = TShock.Regions.GetRegionByName(TShock.Regions.InAreaRegionName(args.Player.TileX, args.Player.TileY));
+                var regions = TShock.Regions.InAreaRegionName(args.Player.TileX, args.Player.TileY);
+
+                if (regions.Count > 1)
+                {
+                    args.Player.SendMessage("You cannot lock doors that have overlapping regions.", Color.Red);
+                }
+                else if (regions.Count == 0)
+                {
+                    region = null;
+                }
+                else
+                {
+                    region = TShock.Regions.GetRegionByName(regions[0]);
+                }
             }
 
             if (region == null)
@@ -351,7 +364,7 @@ namespace ExtendedAdmin
                 return;
             }
 
-            Region region;
+            Region region = null;
 
             if (args.Parameters.Count > 0)
             {
@@ -365,7 +378,20 @@ namespace ExtendedAdmin
                     return;
                 }
 
-                region = TShock.Regions.GetRegionByName(TShock.Regions.InAreaRegionName(args.Player.TileX, args.Player.TileY));
+                var regions = TShock.Regions.InAreaRegionName(args.Player.TileX, args.Player.TileY);
+
+                if (regions.Count > 1)
+                {
+                    args.Player.SendMessage("You cannot unlock doors in overlapping regions.", Color.Red);
+                }
+                else if (regions.Count == 0)
+                {
+                    region = null;
+                }
+                else
+                {
+                    region = TShock.Regions.GetRegionByName(regions[0]);
+                }
             }
 
             if (region == null)
@@ -398,13 +424,13 @@ namespace ExtendedAdmin
 
             var region = TShock.Regions.InAreaRegionName(args.Player.TileX, args.Player.TileY);
 
-            if (region.IsNullOrEmptyTrim())
+            if (region == null || region.Count == 0)
             {
                 args.Player.SendMessage("Not currently in a region.", Color.Yellow);
             }
             else
             {
-                args.Player.SendMessage(string.Format("Current region is {0}", region), Color.Yellow);
+                args.Player.SendMessage(string.Format("Current region is {0}", string.Join(",", region)), Color.Yellow);
             }
         }
         #endregion

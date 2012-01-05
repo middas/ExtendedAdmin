@@ -69,21 +69,21 @@ namespace ExtendedAdmin.DB
             return success;
         }
 
-        public RegionHelper GetRegionHelperByRegion(string region)
+        public List<RegionHelper> GetRegionHelperByRegion(List<string> region)
         {
-            RegionHelper rh = null;
+            List<RegionHelper> rh = new List<RegionHelper>();
 
             try
             {
-                using (var reader = _Connection.QueryReader("SELECT * FROM RegionHelper WHERE RegionName = @0", region))
+                using (var reader = _Connection.QueryReader(string.Format("SELECT * FROM RegionHelper WHERE RegionName IN ('{0}')", string.Join("','", region))))
                 {
-                    if (reader.Read())
+                    while (reader.Read())
                     {
-                        rh = new RegionHelper()
+                        rh.Add(new RegionHelper()
                         {
                             RegionName = reader.Get<string>("RegionName"),
                             IsLocked = bool.Parse(reader.Get<string>("IsLocked"))
-                        };
+                        });
                     }
                 }
             }
