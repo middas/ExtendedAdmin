@@ -79,14 +79,14 @@ namespace ExtendedAdmin
 
             if (!winner.IsNullOrEmptyTrim())
             {
-                //var winnerTicket = raffleTickets.FirstOrDefault(t => t.User == winner);
+                var winnerTicket = raffleTickets.FirstOrDefault(t => t.User == winner);
 
-                TShock.Utils.Broadcast(string.Format("Congratulations {0}, you are the winner of {1} shards!", winner, raffle.Pot), Color.GreenYellow);
+                TShock.Utils.Broadcast(string.Format("Congratulations {0}, you are the winner of {1} shards!", winnerTicket.CharacterName, raffle.Pot), Color.GreenYellow);
                 TShock.Utils.Broadcast("A new raffle begins now!", Color.GreenYellow);
 
                 var player = TShock.Players.Where(p => p!= null && p.UserAccountName == winner).SingleOrDefault();
 
-                manager.Reward(winner, player, raffle.Pot);
+                manager.Reward(winner, winnerTicket.CharacterName, player, raffle.Pot);
 
                 StartRaffle();
             }
