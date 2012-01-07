@@ -238,13 +238,13 @@ namespace ExtendedAdmin.DB
             return raffleTickets;
         }
 
-        public void Reward(string user, TSPlayer player, int amount)
+        public void Reward(string user, string character, TSPlayer player, int amount)
         {
             var raffle = GetCurrentRaffle();
 
             try
             {
-                _Connection.Query("UPDATE Raffle SET Winner = @0, LastRaffle = @1 WHERE RaffleID = @2", user, DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"), raffle.RaffleID);
+                _Connection.Query("UPDATE Raffle SET Winner = @0, LastRaffle = @1 WHERE RaffleID = @2", character, DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"), raffle.RaffleID);
 
                 var account = GetServerPointAccounts(user);
 
