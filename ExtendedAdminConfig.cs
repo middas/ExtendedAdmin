@@ -41,6 +41,9 @@ namespace ExtendedAdmin
         [Description("Shards deducted when sent to prison")]
         public int PrisonShards = 5000;
 
+        [Description("The name of the bank region")]
+        public string BankRegion = "Bank";
+
         public static ExtendedAdminConfig Read(string path)
         {
             if (!File.Exists(path))

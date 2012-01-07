@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using ExtendedAdmin.DB;
 using TShockAPI;
+using CommonLibrary.Native;
 
 namespace ExtendedAdmin
 {
@@ -11,6 +12,11 @@ namespace ExtendedAdmin
     {
         public void Deposit(TSPlayer player, int amount)
         {
+            if (!CheckInRegion(player))
+            {
+                return;
+            }
+
             BankManager manager = new BankManager(TShock.DB);
 
             var account = manager.GetBalance(player.UserAccountName);
@@ -38,8 +44,28 @@ namespace ExtendedAdmin
             }
         }
 
+        private bool CheckInRegion(TSPlayer player)
+        {
+            bool inRegion = true;
+
+            var regions = TShock.Regions.InAreaRegionName(player.TileX, player.TileY);
+
+            if (!regions.ContainsProperty(r => r == ExtendedAdmin.Config.BankRegion))
+            {
+                player.SendMessage("You are not in the bank region.", Color.Red);
+                inRegion = false;
+            }
+
+            return inRegion;
+        }
+
         public void Withdraw(TSPlayer player, int amount)
         {
+            if (!CheckInRegion(player))
+            {
+                return;
+            }
+
             BankManager manager = new BankManager(TShock.DB);
 
             var account = manager.GetBalance(player.UserAccountName);

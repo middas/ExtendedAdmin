@@ -26,6 +26,9 @@ namespace ExtendedAdmin
         [Description("PVPBuff")]
         public static readonly string pvpbuff;
 
+        [Description("Can bank")]
+        public static readonly string bank;
+
         static ExtendedPermissions()
         {
             foreach (var field in typeof(ExtendedPermissions).GetFields())

@@ -62,7 +62,7 @@ namespace ExtendedAdmin
         {
             ExtendedFileTools.InitConfig();
 
-            //SqlTableFactory.GetInstance<BankManager>(TShock.DB).InitializeTable();
+            SqlTableFactory.GetInstance<BankManager>(TShock.DB).InitializeTable();
             SqlTableFactory.GetInstance<PrisonManager>(TShock.DB).InitializeTable();
             SqlTableFactory.GetInstance<RaffleManager>(TShock.DB).InitializeTable();
             SqlTableFactory.GetInstance<RegionHelperManager>(TShock.DB).InitializeTable();
@@ -74,6 +74,7 @@ namespace ExtendedAdmin
             ServerHooks.Chat += new Action<messageBuffer, int, string, HandledEventArgs>(ServerHooks_Chat);
             ServerHooks.Command += new ServerHooks.CommandD(ServerHooks_Command);
 
+            #region Initialize Commands
             Commands.ChatCommands.Add(new Command(Permissions.manageregion, CommandHandlers.GetUserName, "username", "un"));
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.caninvincible, CommandHandlers.HandleInvincible, "invincible"));
             Commands.ChatCommands.Add(new Command(Permissions.spawnmob, CommandHandlers.SpawnMobAtPlayerHandler, "spawnmobat", "sma"));
@@ -92,6 +93,8 @@ namespace ExtendedAdmin
             Commands.ChatCommands.Add(new Command(Permissions.buffplayer, CommandHandlers.BuffAll, "buffall", "ba"));
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.pvpbuff, CommandHandlers.Buff, "selfbuff"));
             Commands.ChatCommands.Add(new Command(ExtendedPermissions.pvpheal, CommandHandlers.Heal, "selfheal"));
+            Commands.ChatCommands.Add(new Command(ExtendedPermissions.bank, CommandHandlers.Bank, "bank"));
+            #endregion
         }
 
         private void NetHooks_SendData(SendDataEventArgs e)

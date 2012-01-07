@@ -710,5 +710,97 @@ namespace ExtendedAdmin
 
         }
         #endregion
+
+        #region Bank
+        public static void Bank(CommandArgs args)
+        {
+            if (!args.Player.RealPlayer)
+            {
+                args.Player.SendMessage("You must be logged in to use this command.", Color.Red);
+                return;
+            }
+
+            if (!args.Player.IsLoggedIn)
+            {
+                args.Player.SendMessage("You must be logged in to use this command.", Color.Red);
+                return;
+            }
+
+            if (args.Parameters.Count < 1)
+            {
+                BankHelp(args.Player);
+                return;
+            }
+
+            switch (args.Parameters[0])
+            {
+                case "deposit":
+                    if (ValidateAmount(args.Player, args.Parameters))
+                    {
+                        Deposit(args.Player, args.Parameters[1].ToIntegerOrDefault(-1));
+                    }
+                    break;
+                case "withdraw":
+                    if (ValidateAmount(args.Player, args.Parameters))
+                    {
+                        Withdraw(args.Player, args.Parameters[1].ToIntegerOrDefault(-1));
+                    }
+                    break;
+                case "balance":
+                    Balance(args.Player);
+                    break;
+                default:
+                    BankHelp(args.Player);
+                    break;
+            }
+        }
+
+        private static bool ValidateAmount(TSPlayer player, List<string> list)
+        {
+            bool valid = true;
+
+            if (list.Count < 2)
+            {
+                BankHelp(player);
+                valid = false;
+            }
+
+            if (list[1].ToIntegerOrDefault(-1) < 1)
+            {
+                BankHelp(player);
+                valid = false;
+            }
+
+            return valid;
+        }
+
+        private static void BankHelp(TSPlayer player)
+        {
+            player.SendMessage("/bank deposit <amount>", Color.Yellow);
+            player.SendMessage("/bank withdraw <amount>", Color.Yellow);
+            player.SendMessage("/bank balance", Color.Yellow);
+        }
+
+        private static void Deposit(TSPlayer player, int amount)
+        {
+            BankHandler handler = new BankHandler();
+
+            handler.Deposit(player, amount);
+        }
+
+        private static void Withdraw(TSPlayer player, int amount)
+        {
+            BankHandler handler = new BankHandler();
+
+            handler.Withdraw(player, amount);
+        }
+
+        private static void Balance(TSPlayer player)
+        {
+            BankHandler handler = new BankHandler();
+
+            handler.GetBalance(player);
+        }
+        #endregion
     }
 }
