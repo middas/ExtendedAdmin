@@ -21,26 +21,36 @@ namespace ExtendedAdmin
 
             var account = manager.GetBalance(player.UserAccountName);
 
-            // piggy back on the raffle manager to get shards
-            RaffleManager raffleManager = new RaffleManager(TShock.DB);
+            //// piggy back on the raffle manager to get shards
+            //RaffleManager raffleManager = new RaffleManager(TShock.DB);
 
-            var shards = raffleManager.GetServerPointAccounts(player.UserAccountName);
-
-            if (shards.Amount < amount)
+            //var shards = raffleManager.GetServerPointAccounts(player.UserAccountName);
+            try
             {
-                player.SendMessage("You do not have the required shards.", Color.Red);
-            }
-            else
-            {
-                manager.Deposit(player.UserAccountName, amount);
+                var ePlayer = ServerPointSystem.ServerPointSystem.EPRPlayers.Single(p => p.TSPlayer == player);
 
-                ServerPointSystem.ServerPointSystem.Deduct(new CommandArgs("deduct", player, new List<string>() 
+                if (ePlayer.DisplayAccount < amount)
                 {
-                    player.UserAccountName,
-                    amount.ToString()
-                }));
+                    player.SendMessage("You do not have the required shards.", Color.Red);
+                }
+                else
+                {
+                    manager.Deposit(player.UserAccountName, amount);
 
-                player.SendMessage("You have successfully deposited into your account.", Color.Green);
+                    ServerPointSystem.EPREvents.PointOperate(ePlayer, -amount, ServerPointSystem.PointOperateReason.Deduct);
+
+                    //ServerPointSystem.ServerPointSystem.Deduct(new CommandArgs("deduct", player, new List<string>() 
+                    //{
+                    //    player.UserAccountName,
+                    //    amount.ToString()
+                    //}));
+
+                    player.SendMessage("You have successfully deposited into your account.", Color.Green);
+                }
+            }
+            catch (Exception ex)
+            {
+                player.SendMessage("Could not deposit at this time.", Color.Red);
             }
         }
 
@@ -76,15 +86,26 @@ namespace ExtendedAdmin
             }
             else
             {
-                manager.Withdraw(player.UserAccountName, amount);
-
-                ServerPointSystem.ServerPointSystem.Award(new CommandArgs("award", player, new List<string>()
+                try
                 {
-                    player.Name,
-                    amount.ToString()
-                }));
+                    var ePlayer = ServerPointSystem.ServerPointSystem.EPRPlayers.Single(p => p.TSPlayer == player);
 
-                player.SendMessage("You have successfully withdrawn from your account.", Color.Green);
+                    manager.Withdraw(player.UserAccountName, amount);
+
+                    ServerPointSystem.EPREvents.PointOperate(ePlayer, amount, ServerPointSystem.PointOperateReason.Award);
+
+                    //ServerPointSystem.ServerPointSystem.Award(new CommandArgs("award", player, new List<string>()
+                    //{
+                    //    player.Name,
+                    //    amount.ToString()
+                    //}));
+
+                    player.SendMessage("You have successfully withdrawn from your account.", Color.Green);
+                }
+                catch (Exception ex)
+                {
+                    player.SendMessage("Could not withdraw shards at this time.", Color.Red);
+                }
             }
         }
 
