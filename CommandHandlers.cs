@@ -475,9 +475,10 @@ namespace ExtendedAdmin
 
             RaffleManager manager = new RaffleManager(TShock.DB);
 
-            var account = manager.GetServerPointAccounts(args.Player.UserAccountName);
+            //var account = manager.GetServerPointAccounts(args.Player.UserAccountName);
+            var ePlayer = ServerPointSystem.ServerPointSystem.EPRPlayers.Single(p => p.TSPlayer == args.Player);
 
-            if (account == null)
+            if (ePlayer == null)
             {
                 args.Player.SendMessage("You do not have any shards.");
                 return;
@@ -496,7 +497,7 @@ namespace ExtendedAdmin
 
             int totalCost = amount * ExtendedAdmin.Config.RaffleTicketCost;
 
-            if (account.Amount < totalCost)
+            if (ePlayer.DisplayAccount < totalCost)
             {
                 args.Player.SendMessage(string.Format("You do not have enough shards to buy {0} tickets.", amount), Color.Red);
                 return;
@@ -641,7 +642,7 @@ namespace ExtendedAdmin
         }
         #endregion
 
-        #region PVP Save Commands
+        #region PVP Safe Commands
         public static void Heal(CommandArgs args)
         {
             if (args.Player.TPlayer.hostile)
